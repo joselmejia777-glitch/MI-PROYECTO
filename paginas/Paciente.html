@@ -304,7 +304,7 @@ async function registrarPaciente(){
     };
 
     try{
-        const respuesta = await fetch('http://localhost:10000/pacientes', {
+        const respuesta = await fetch('https://mi-proyecto-y2me.onrender.com/pacientes', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
