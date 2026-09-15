@@ -1,0 +1,20 @@
+{
+  "name": "api-rest",
+  "version": "1.0.0",
+  "description": "API REST de citas médicas",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app.js"
+  },
+  "keywords": [],
+  "author": "Jose Mejia",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.6",
+    "express": "^4.21.2",
+    "mongoose": "^8.18.0",
+    "nodemon": "^3.1.10"
+  }
+}

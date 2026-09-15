@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>SaludPro</title>
+
+<style>
+
+/* ================= BASE ================= */
+body{
+    margin:0;
+    font-family: Arial, sans-serif;
+    display:flex;
+    flex-direction:column;
+    min-height:100vh;
+}
+
+/* ================= HEADER ================= */
+header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:skyblue;
+    padding:12px 20px;
+}
+
+/* LOGO */
+.logo img{
+    width:90px;
+}
+
+/* MENÚ CENTRADO */
+nav{
+    flex:1;
+    display:flex;
+    justify-content:center;
+    gap:10px;
+}
+
+nav a{
+    text-decoration:none;
+    background:white;
+    padding:8px 12px;
+    border-radius:5px;
+    font-weight:bold;
+    color:black;
+}
+
+nav a:hover{
+    background: rgb(230, 242, 255);
+    color: black; /* para que no herede otro color raro */
+}
+
+/* Estado activo */
+.activo {
+    background: rgb(230, 242, 255);
+    color: black;
+    padding: 10px;
+    display: inline-block; /* importante para que el padding se vea bien */
+}
+
+/* BUSCADOR */
+.buscador{
+    display:flex;
+    align-items:center;
+    background:white;
+    border-radius:20px;
+    padding:5px 10px;
+}
+
+.buscador input{
+    border:none;
+    outline:none;
+    width:120px;
+}
+
+.buscador button{
+    border:none;
+    background:none;
+    cursor:pointer;
+}
+
+
+/* ================= ACCESIBILIDAD ================= */
+.accesibilidad{
+    position:fixed;
+    left:20px;
+    top:50%;
+    transform:translateY(-50%);
+    cursor:pointer;
+    z-index:1000;
+}
+
+.accesibilidad img{
+    width:70px;
+}
+
+/* ================= BOTONES FIJOS ================= */
+.acciones{
+    position:fixed;
+    right:40px;
+    top:40%;
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+    z-index:1000;
+}
+
+.btn{
+    background:skyblue;
+    border:none;
+    padding:18px;
+    width:260px;
+    font-size:20px;
+    font-weight:bold;
+    border-radius:12px;
+    cursor:pointer;
+}
+
+.btn:hover{
+    background:#5fbde5;
+}
+
+/* ================= REDES SOCIALES ================= */
+.redes-sociales{
+    position: fixed;
+    top: 90px;
+    right: 20px;
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    text-align: center;
+    z-index: 1000; 
+}
+
+.redes-sociales .titulo{
+    font-weight:bold;
+    margin-bottom:10px;
+}
+
+.redes{
+    display:flex;
+    gap:15px;
+    justify-content:center;
+}
+
+.redes a{
+    text-decoration:none;
+    font-weight:bold;
+    color:black;
+}
+
+/* ================= NOTICIAS ================= */
+.noticias{
+    text-align:center;
+    margin-top:30px;
+}
+
+.titulo-noticias{
+    font-size:24px;
+    font-weight:bold;
+    margin-bottom:20px;
+}
+
+.carrusel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+/* TARJETA */
+.card {
+    min-width: 100%;
+    box-sizing: border-box;
+    border: 1px solid black;    
+    border-radius: 5px;
+    overflow: hidden;          
+}
+
+/* IMAGEN */
+.card img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* SLIDER */
+.slider {
+    display: flex;
+}
+
+/* VENTANA DEL CARRUSEL */
+.ventana {
+    width: 600px;
+    overflow: hidden;
+}
+
+/* FLECHAS */
+.flecha {
+    background: white;
+    border: none;
+    font-size: 35px;
+    cursor: pointer;
+    padding: 10px;
+}
+
+.flecha{
+    background:white;
+    border:none;
+    font-size:35px;
+    cursor:pointer;
+    padding:10px;
+}
+
+.ventana{
+    width:600px;
+    overflow:hidden;
+}
+
+.slider{
+    display:flex;
+    transition:transform 0.4s ease;
+}
+
+.card{
+    min-width:600px;
+    background:white;
+    border-radius:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.2);
+}
+
+.card img{
+    width:100%;
+    height:300px;
+    object-fit:cover;
+}
+
+.texto{
+    padding:12px;
+    font-weight:bold;
+}
+
+    /* ================= FOOTER ================= */
+    footer{
+        background:skyblue;
+        padding:12px 20px;
+        margin-top:auto;
+        position:relative;
+    }
+
+    /* BARRA PRINCIPAL */
+    .footer-line{
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:20px;
+        font-size:14px; /* 🔥 más grande */
+    }
+
+    /* ELEMENTOS */
+    .item{
+        display:flex;
+        align-items:center;
+        gap:8px;
+        white-space:nowrap;
+    }
+
+    /* TÍTULOS MÁS VISIBLES */
+    .item strong{
+        font-size:14px;
+    }
+
+    /* TEXTO NORMAL */
+    .item span{
+        font-size:13px;
+    }
+
+    /* ÍCONOS MÁS GRANDES */
+    .item img{
+        width:38px;
+        height:auto;
+    }
+    </style>
+    </head>
+
+    <body>
+
+    <!-- ACCESIBILIDAD -->
+    <div class="accesibilidad" onclick="alert('Opciones de accesibilidad')">
+        <img src="img/Logoayuda.PNG">
+    </div>
+
+    <!-- BOTONES FIJOS -->
+    <div class="acciones">
+        <button class="btn" onclick="location.href='paginas/registro.html'">REGÍSTRATE</button>
+        <button class="btn" onclick="window.location.href='paginas/citas.html'">
+        AGENDA TU CITA
+    </button>
+    </div>
+
+    <!-- HEADER -->
+    <header>
+
+        <div class="logo">
+            <img src="img/Prosalud.png">
+        </div>
+
+        <nav>
+            <span class="activo">Inicio</span>
+            <a href="paginas/nosotros.html">Nosotros</a>
+            <a href="#">Servicios</a>
+            <a href="#">Transparencia</a>
+            <a href="paginas/login.html">Iniciar sesión</a>
+        </nav>
+
+        <div class="buscador">
+            <input type="text" placeholder="Buscar">
+            <button>🔍</button>
+        </div>
+
+    </header>
+
+<!-- NOTICIAS -->
+<div class="noticias">
+
+    <div class="titulo-noticias">Novedades / Noticias</div>
+
+    <div class="carrusel">
+
+        <button class="flecha" onclick="mover(-1)">&#10094;</button>
+
+        <div class="ventana">
+            <div class="slider" id="slider">
+
+                <div class="card">
+                    <div class="texto">
+                        Jornada de Vacunación contra la Fiebre Amarilla
+                    </div>
+                    <img src="img/medico1.png">
+                </div>
+
+                <div class="card">
+                    <div class="texto">
+                        Campaña de Salud Preventiva y Chequeos Médicos
+                    </div>
+                    <img src="img/medico2.png">
+                </div>
+
+            </div>
+        </div>
+
+        <button class="flecha" onclick="mover(1)">&#10095;</button>
+
+    </div>
+</div>
+
+<!-- REDES -->
+<div class="redes-sociales">
+
+    <div class="titulo">Redes Sociales</div>
+
+    <div class="redes">
+        <a href="#">WhatsApp</a>
+        <a href="#">Facebook</a>
+        <a href="#">Instagram</a>
+    </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+
+    <div class="footer-line">
+
+        <div class="item">
+            <strong>Derechos Pacientes</strong>
+            <img src="img/acrobat.png">
+            <span>Leer</span>
+        </div>
+
+        <div class="item">
+            <strong>Derechos Usuarios</strong>
+            <img src="img/acrobat.png">
+            <span>Leer</span>
+        </div>
+
+        <div class="item">
+            <strong>Horarios</strong>
+            <span>Lun-Vie 07-17 | Sáb 08-12 | Dom cerrado</span>
+        </div>
+
+        <div class="item">
+            <strong>Sede</strong>
+            <span>Cra. 19 #18-15 Bogotá</span>
+        </div>
+
+        <div class="item">
+            <img src="img/Contraloria.PNG">
+            <img src="img/Ministerio de Salud.PNG">
+            <img src="img/wasap.PNG">
+            <img src="img/Supersalud.PNG">
+        </div>
+
+        <div class="item">
+            <img src="img/Copyright.PNG">
+            <span>Prosalud 2026</span>
+        </div>
+
+    </div>
+
+</footer>
+
+<!-- SCRIPT -->
+<script>
+let posicion = 0;
+
+function mover(dir){
+    const slider = document.getElementById("slider");
+    const total = slider.children.length;
+
+    posicion += dir;
+
+    if(posicion < 0){
+        posicion = total - 1;
+    }
+
+    if(posicion >= total){
+        posicion = 0;
+    }
+
+    slider.style.transform = "translateX(" + (-600 * posicion) + "px)";
+}
+</script>
+
+</body>
+</html>

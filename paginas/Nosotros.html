@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Nosotros - Pro Salud</title>
+<style>
+
+/* ================= BASE ================= */
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+/* ================= HEADER ================= */
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: skyblue;
+    padding: 12px 20px;
+}
+
+.logo img {
+    width: 90px;
+}
+
+nav {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+nav a {
+    text-decoration: none;
+    background: white;
+    padding: 8px 14px;
+    border-radius: 5px;
+    font-weight: bold;
+    color: black;
+}
+
+nav a:hover {
+    background: #e6f2ff;
+}
+
+.activo {
+    background: #d0eaf8;
+    padding: 8px 14px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+/* ================= BUSCADOR ================= */
+.buscador {
+    display: flex;
+    align-items: center;
+    background: white;
+    border-radius: 20px;
+    padding: 5px 10px;
+    gap: 6px;
+}
+
+.buscador input {
+    border: none;
+    outline: none;
+    font-size: 14px;
+}
+
+.buscador button {
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+/* ================= REDES SOCIALES (fijo) ================= */
+.redes-sociales {
+    position: fixed;
+    top: 90px;
+    right: 30px;
+    background: white;
+    padding: 12px 18px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 9999;
+    text-align: center;
+    font-size: 14px;
+}
+
+/* ================= ACCESIBILIDAD (fijo) ================= */
+.accesibilidad {
+    position: fixed;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 9999;
+}
+
+.accesibilidad img {
+    width: 55px;
+}
+
+/* ================= BOTONES FIJOS ================= */
+.acciones {
+    position: fixed;
+    right: 30px;
+    top: 42%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    z-index: 9999;
+}
+
+.btn {
+    background: skyblue;
+    border: none;
+    padding: 16px;
+    width: 220px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: #5bbde4;
+}
+
+/* ================= CONTENIDO ================= */
+.nosotros {
+    width: 75%;
+    margin: 40px auto;
+}
+
+/* --- BLOQUE 1: Fachada + texto intro --- */
+.bloque1 {
+    display: flex;
+    align-items: flex-start;
+    gap: 40px;
+    margin-bottom: 50px;
+}
+
+.bloque1 .fachada {
+    width: 320px;
+    flex-shrink: 0;
+    border-radius: 10px;
+}
+
+.bloque1 .texto-intro {
+    flex: 1;
+    font-size: 15px;
+    line-height: 1.7;
+    color: #222;
+}
+
+/* --- BLOQUE 2: doctora + checks --- */
+.bloque2 {
+    display: flex;
+    align-items: flex-start;
+    gap: 40px;
+    margin-bottom: 50px;
+}
+
+.bloque2 .doctora {
+    width: 280px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+}
+
+.bloque2 .texto-checks {
+    flex: 1;
+}
+
+.bloque2 .titulo-bloque {
+    font-size: 20px;
+    font-weight: bold;
+    color: #17a8c9;
+    font-style: italic;
+    margin-bottom: 18px;
+}
+
+/* Cada ítem con check */
+.check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+    font-size: 15px;
+    line-height: 1.5;
+    color: #222;
+}
+
+.check-item .check {
+    color: #17a8c9;
+    font-size: 22px;
+    flex-shrink: 0;
+    line-height: 1.3;
+}
+
+/* Fila WhatsApp */
+.wasap-fila {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: bold;
+    margin-top: 4px;
+}
+
+.wasap-fila img {
+    width: 36px;
+    flex-shrink: 0;
+}
+
+/* --- BLOQUE 3: párrafo "Porque su salud nos importa" --- */
+.bloque3 {
+    margin-bottom: 40px;
+}
+
+.bloque3 h2 {
+    font-size: 22px;
+    color: #222;
+    margin-bottom: 14px;
+}
+
+.bloque3 p {
+    font-size: 15px;
+    line-height: 1.75;
+    color: #333;
+    max-width: 680px;
+}
+
+/* ================= FOOTER ================= */
+footer {
+    background: skyblue;
+    padding: 14px 30px;
+    margin-top: 20px;
+}
+
+.footer-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    font-size: 13px;
+    flex-wrap: wrap;
+}
+
+.footer-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.footer-item img {
+    width: 34px;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header>
+    <div class="logo">
+        <img src="../img/Prosalud.PNG" alt="Pro Salud">
+    </div>
+
+    <nav>
+        <a href="../index.html">Inicio</a>
+        <span class="activo">Nosotros</span>
+        <a href="#">Servicios</a>
+        <a href="#">Transparencia</a>
+        <a href="login.html">Iniciar sesión</a>
+    </nav>
+
+    <div class="buscador">
+        <input type="text" placeholder="Buscar">
+        <button>🔍</button>
+    </div>
+</header>
+
+<!-- REDES SOCIALES FIJO -->
+<div class="redes-sociales">
+    <strong>Redes Sociales</strong><br>
+    WhatsApp · Facebook · Instagram
+</div>
+
+<!-- ACCESIBILIDAD FIJO -->
+<div class="accesibilidad">
+    <img src="../img/Logoayuda.PNG" alt="Accesibilidad">
+</div>
+
+<!-- BOTONES FIJOS -->
+<div class="acciones">
+    <button class="btn">REGÍSTRATE</button>
+    <button class="btn">AGENDA TU CITA</button>
+</div>
+
+<!-- CONTENIDO -->
+<div class="nosotros">
+
+    <!-- BLOQUE 1: Fachada + párrafo introductorio -->
+    <div class="bloque1">
+        <img src="../img/Fachada.PNG" class="fachada" alt="Fachada clínica">
+
+        <div class="texto-intro">
+            <p>
+                Somos expertos en brindar asistencia médica profesional confiable en Medicina General,
+                Odontología, Pediatría, Optometría y Fisioterapia.
+            </p>
+        </div>
+    </div>
+
+    <!-- BLOQUE 2: Doctora + checks + WhatsApp -->
+    <div class="bloque2">
+        <img src="../img/doctora.PNG" class="doctora" alt="Doctora">
+
+        <div class="texto-checks">
+
+            <p class="titulo-bloque">Porque tu Salud nos Importa</p>
+
+            <div class="check-item">
+                <span class="check">✔</span>
+                <span>Estamos comprometidos a ofrecer atención personalizada y humanizada a todos nuestros pacientes.</span>
+            </div>
+
+            <div class="check-item">
+                <span class="check">✔</span>
+                <span>Nuestros médicos están comprometidos con la promoción y preservación de la salud de nuestros pacientes.</span>
+            </div>
+
+            <div class="check-item">
+                <span class="check">✔</span>
+                <span>Proporcionamos diagnósticos y tratamientos precisos y eficaces para que nuestros pacientes puedan mejorar su calidad de vida.</span>
+            </div>
+
+            <div class="check-item">
+                <span class="check">✔</span>
+                <div class="wasap-fila">
+                    <span>Tenemos más de 15 años de experiencia &nbsp;–&nbsp;</span>
+                    <img src="../img/wasap.PNG" alt="WhatsApp">
+                    <span>313-5050203</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- BLOQUE 3: Párrafo largo -->
+    <div class="bloque3">
+        <h2>Porque su salud nos importa</h2>
+        <p>
+            En nuestra clínica, entendemos que tu salud es lo más importante. Por eso, nos comprometemos
+            a brindarte la mejor atención médica posible. Con un equipo altamente calificado y tecnología
+            de vanguardia, estamos aquí para cuidar de ti en cada paso del camino. Tu bienestar es nuestra
+            prioridad número uno, y trabajaremos incansablemente para garantizar que recibas el cuidado que
+            mereces. En nuestra institución, puedes confiar en que estás en buenas manos. Porque tu salud
+            es lo que más nos importa.
+        </p>
+    </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+    <div class="footer-line">
+
+        <div class="footer-item">
+            <strong>Derechos Pacientes</strong>
+            <img src="../img/acrobat.png" alt="PDF">
+            <span>Leer</span>
+        </div>
+
+        <div class="footer-item">
+            <strong>Derechos Usuarios</strong>
+            <img src="../img/acrobat.png" alt="PDF">
+            <span>Leer</span>
+        </div>
+
+        <div class="footer-item">
+            <strong>Horarios</strong>
+            <span>Lun-Vie 07-17 | Sáb 08-12</span>
+        </div>
+
+        <div class="footer-item">
+            <strong>Sede</strong>
+            <span>Cra. 19 #18-15 Bogotá</span>
+        </div>
+
+    </div>
+</footer>
+
+</body>
+</html>

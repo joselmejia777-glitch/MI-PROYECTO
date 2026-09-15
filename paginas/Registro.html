@@ -1,0 +1,258 @@
+   <!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>ProSalud</title>
+
+<style>
+body{
+    margin:0;
+    font-family: Arial, sans-serif;
+}
+
+/* ================= HEADER ================= */
+header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:#87CEEB;
+    padding:12px 20px;
+}
+
+/* LOGO PROSALUD */
+.logo img{
+    height:85px;
+}
+
+/* NAV MENÚ */
+nav{
+    display:flex;
+    gap:10px;
+}
+
+nav a{
+    text-decoration:none;
+    background:white;
+    color:#333;
+    padding:8px 15px;
+    border-radius:5px;
+    font-weight:bold;
+    transition:0.3s;
+}
+
+nav a:hover{
+    background:#e6f2ff;
+    color:#0077cc;
+}
+
+/* BUSCADOR OVALADO */
+.search button{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    width:240px;
+    padding:10px 15px;
+    border:none;
+    border-radius:30px;
+    background:white;
+    cursor:pointer;
+    font-style:italic;
+    font-weight:bold;
+}
+
+/* texto a la izquierda */
+.search button span{
+    flex:1;
+    text-align:left;
+    color:gray;
+}
+
+/* lupa */
+.search img{
+    height:22px;
+}
+
+.search img{
+    height:22px;
+}
+
+/* ================= BODY ================= */
+.contenido{
+    display:flex;
+    align-items:center;          /* centra vertical */
+    justify-content:flex-start;
+    height: calc(100vh - 120px); /* altura real menos header */
+    padding: 0 20px 0 10px;
+}
+
+/* IZQUIERDA */
+.columna-izquierda{
+    width:70px;
+    display:flex;
+    justify-content:center;
+    align-items:center; /* centra el logo dentro de su columna */
+}
+
+/* LOGO */
+.logo-ayuda-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+}
+
+.logo-ayuda{
+    width:90px;
+    height:auto;
+    transition:0.3s;
+}
+
+.logo-ayuda-btn:hover .logo-ayuda{
+    transform:scale(1.05);
+}
+
+/* CENTRO */
+.area-central{
+    flex:1;        /* ocupa todo lo demás */
+    text-align:center;
+}
+
+/* LEYENDA */
+.leyenda{
+    font-size:22px;
+    font-weight:bold;
+    color:black;
+    margin-bottom:40px;
+    position:relative;
+    top:-10px; /* la sube un poco */
+    display:inline-block;
+}
+
+/* línea azul debajo */
+.leyenda::after{
+    content:"";
+    display:block;
+    width:100%;
+    height:5px;
+    background:Skyblue;
+    margin:12px auto 0 auto;
+    border-radius:10px;
+}
+
+/* CARDS */
+.cards{
+    display:flex;
+    gap:60px;
+    justify-content:center;
+}
+
+.card img{
+    width:150px;
+    height:150px;
+    object-fit:contain;
+}
+
+.card button{
+    margin-top:10px;
+    padding:10px 20px;
+    border:none;
+    background:#0077cc;
+    color:white;
+    cursor:pointer;
+    border-radius:5px;
+    font-size: 20px;
+}
+
+.card button:hover{
+    background:#005fa3;
+}
+</style>
+
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header>
+
+    <!-- LOGO PROSALUD -->
+    <div class="logo">
+        <img src="../img/Prosalud.png">
+    </div>
+
+    <!-- MENÚ -->
+    <nav>
+        <a href="../index.html">Inicio</a>
+        <a href="Nosotros.html">Nosotros</a>
+        <a href="#">Servicios</a>
+        <a href="#">Canales de atención</a>
+        <a href="#">Transparencia</a>
+    </nav>
+
+    <!-- BUSCADOR -->
+    <div class="search">
+    <button>
+        <span>Buscar ...</span>
+        <img src="../img/Lupa.PNG">
+    </button>
+</div>
+
+</header>
+
+<!-- BODY -->
+<div class="contenido">
+
+    <!-- IZQUIERDA -->
+    <div class="columna-izquierda">
+        <a href="#" class="logo-ayuda-btn" onclick="mostrarAyuda()">
+    <img src="../img/Logoayuda.PNG" class="logo-ayuda">
+</a>
+    </div>
+
+    <!-- CENTRO -->
+    <div class="area-central">
+
+        <div class="leyenda">
+            Para obtener tu clave, elige tu relación con nosotros
+        </div>
+
+        <div class="cards">
+
+            <div class="card">
+    <img src="../img/PACIENTE.PNG">
+    <br>
+    <button onclick="window.location.href='paciente.html'">Paciente</button>
+</div>
+
+<div class="card">
+    <img src="../img/medico.png">
+    <br>
+    <button onclick="window.location.href='medico.html'">Médico</button>
+</div>
+
+<div class="card">
+    <img src="../img/empleado.png">
+    <br>
+    <button onclick="window.location.href='empleado.html'">Empleado</button>
+</div>
+<script>
+function mostrarAyuda(){
+    alert(
+        "Opciones de accesibilidad:\n\n" +
+        "- Cambio de tamaño de texto\n" +
+        "- Alto contraste\n" +
+        "- Lectura automática (simulada)\n\n" +
+        "Aquí luego podemos crear un panel real."
+    );
+}
+</script>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Iniciar Sesión</title>
+
+<style>
+
+body{
+    margin:0;
+    font-family:Arial;
+    background:skyblue;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+/* CUADRO LOGIN */
+.login{
+    background:white;
+    padding:50px;
+    border-radius:12px;
+    width:420px;   /* 🔥 más ancho */
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.2);
+}
+
+.login h2{
+    text-align:center;
+    font-size:26px; /* 🔥 más grande */
+}
+
+/* INPUTS MÁS GRANDES */
+.login input{
+    padding:14px;
+    border:1px solid gray;
+    border-radius:6px;
+    font-size:16px;
+}
+
+/* BOTÓN MÁS GRANDE */
+.login button{
+    padding:14px;
+    border:none;
+    background:skyblue;
+    font-weight:bold;
+    cursor:pointer;
+    border-radius:6px;
+    font-size:16px;
+}
+
+.login button:hover{
+    background:#5fbde5;
+}
+
+/* BOTÓN */
+.login button{
+    padding:10px;
+    border:none;
+    background:skyblue;
+    font-weight:bold;
+    cursor:pointer;
+    border-radius:5px;
+}
+
+.login button:hover{
+    background:#5fbde5;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="login">
+
+    <h2>Iniciar Sesión</h2>
+
+    <input type="text" placeholder="Usuario o correo">
+
+    <input type="password" placeholder="Contraseña">
+
+    <button>Ingresar</button>
+
+</div>
+
+</body>
+</html>
