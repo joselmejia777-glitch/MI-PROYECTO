@@ -1,438 +1,523 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>SaludPro</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRO SALUD - Página Principal</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
 
-<style>
+        body {
+            background-color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow-x: hidden;
+            position: relative;
+        }
 
-/* ================= BASE ================= */
-body{
-    margin:0;
-    font-family: Arial, sans-serif;
-    display:flex;
-    flex-direction:column;
-    min-height:100vh;
-}
+        /* HEADER STYLES */
+        header {
+            background-color: #82C8EE;
+            height: 65px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+            position: relative;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
 
-/* ================= HEADER ================= */
-header{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    background:skyblue;
-    padding:12px 20px;
-}
+        .logo-container {
+            display: flex;
+            align-items: center;
+            background-color: #0b3c8c;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 2px;
+            height: 52px;
+            cursor: pointer;
+            text-decoration: none;
+        }
 
-/* LOGO */
-.logo img{
-    width:90px;
-}
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            margin-right: 6px;
+            fill: #ffffff;
+        }
 
-/* MENÚ CENTRADO */
-nav{
-    flex:1;
-    display:flex;
-    justify-content:center;
-    gap:10px;
-}
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
 
-nav a{
-    text-decoration:none;
-    background:white;
-    padding:8px 12px;
-    border-radius:5px;
-    font-weight:bold;
-    color:black;
-}
+        .logo-title {
+            font-weight: 900;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            line-height: 1;
+        }
 
-nav a:hover{
-    background: rgb(230, 242, 255);
-    color: black; /* para que no herede otro color raro */
-}
+        .logo-subtitle {
+            font-size: 6px;
+            letter-spacing: 0.2px;
+            margin-top: 2px;
+            opacity: 0.9;
+        }
 
-/* Estado activo */
-.activo {
-    background: rgb(230, 242, 255);
-    color: black;
-    padding: 10px;
-    display: inline-block; /* importante para que el padding se vea bien */
-}
+        /* NAVIGATION MENU */
+        nav {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
 
-/* BUSCADOR */
-.buscador{
-    display:flex;
-    align-items:center;
-    background:white;
-    border-radius:20px;
-    padding:5px 10px;
-}
+        .nav-btn {
+            background-color: #ffffff;
+            color: #000000;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+            transition: background-color 0.2s;
+        }
 
-.buscador input{
-    border:none;
-    outline:none;
-    width:120px;
-}
+        .nav-btn:hover {
+            background-color: #f0f0f0;
+        }
 
-.buscador button{
-    border:none;
-    background:none;
-    cursor:pointer;
-}
+        /* SEARCH BAR */
+        .search-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
 
+        .search-input {
+            padding: 5px 28px 5px 12px;
+            border-radius: 15px;
+            border: 1px solid #ccc;
+            font-size: 12px;
+            outline: none;
+            width: 140px;
+        }
 
-/* ================= ACCESIBILIDAD ================= */
-.accesibilidad{
-    position:fixed;
-    left:20px;
-    top:50%;
-    transform:translateY(-50%);
-    cursor:pointer;
-    z-index:1000;
-}
+        .search-icon {
+            position: absolute;
+            right: 8px;
+            width: 14px;
+            height: 14px;
+            fill: #666;
+            cursor: pointer;
+        }
 
-.accesibilidad img{
-    width:70px;
-}
+        /* MAIN CONTENT SECTION */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 15px;
+            position: relative;
+            max-width: 1280px;
+            margin: 0 auto;
+            width: 100%;
+        }
 
-/* ================= BOTONES FIJOS ================= */
-.acciones{
-    position:fixed;
-    right:40px;
-    top:40%;
-    display:flex;
-    flex-direction:column;
-    gap:20px;
-    z-index:1000;
-}
+        /* ACCESSIBILITY FLOATING ICON */
+        .accessibility-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 42px;
+            height: 42px;
+            background-color: #00a0e9;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
 
-.btn{
-    background:skyblue;
-    border:none;
-    padding:18px;
-    width:260px;
-    font-size:20px;
-    font-weight:bold;
-    border-radius:12px;
-    cursor:pointer;
-}
+        .accessibility-icon svg {
+            width: 26px;
+            height: 26px;
+            fill: white;
+        }
 
-.btn:hover{
-    background:#5fbde5;
-}
+        /* SOCIAL MEDIA FLOATING BOX */
+        .social-box {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 8px 16px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+            text-align: center;
+            z-index: 20;
+            border: 1px solid #eee;
+        }
 
-/* ================= REDES SOCIALES ================= */
-.redes-sociales{
-    position: fixed;
-    top: 90px;
-    right: 20px;
-    background: white;
-    padding: 15px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    text-align: center;
-    z-index: 1000; 
-}
+        .social-title {
+            font-size: 11px;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 4px;
+        }
 
-.redes-sociales .titulo{
-    font-weight:bold;
-    margin-bottom:10px;
-}
+        .social-links {
+            display: flex;
+            gap: 10px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #000;
+        }
 
-.redes{
-    display:flex;
-    gap:15px;
-    justify-content:center;
-}
+        .social-links span {
+            cursor: pointer;
+        }
 
-.redes a{
-    text-decoration:none;
-    font-weight:bold;
-    color:black;
-}
+        .social-links span:hover {
+            text-decoration: underline;
+        }
 
-/* ================= NOTICIAS ================= */
-.noticias{
-    text-align:center;
-    margin-top:30px;
-}
+        /* NEWS & CAROUSEL SECTION */
+        .news-section {
+            width: 100%;
+            max-width: 620px;
+            margin-top: 10px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-.titulo-noticias{
-    font-size:24px;
-    font-weight:bold;
-    margin-bottom:20px;
-}
+        .news-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #000000;
+        }
 
-.carrusel {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-}
+        .carousel-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            gap: 15px;
+        }
 
-/* TARJETA */
-.card {
-    min-width: 100%;
-    box-sizing: border-box;
-    border: 1px solid black;    
-    border-radius: 5px;
-    overflow: hidden;          
-}
+        .carousel-arrow {
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+            color: #000;
+            padding: 5px;
+        }
 
-/* IMAGEN */
-.card img {
-    width: 100%;
-    height: auto;
-    display: block;
-}
+        .carousel-card {
+            border: 1px solid #333333;
+            border-radius: 10px;
+            padding: 12px;
+            background-color: #ffffff;
+            width: 100%;
+            max-width: 520px;
+        }
 
-/* SLIDER */
-.slider {
-    display: flex;
-}
+        .carousel-header {
+            font-size: 13px;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 10px;
+        }
 
-/* VENTANA DEL CARRUSEL */
-.ventana {
-    width: 600px;
-    overflow: hidden;
-}
+        .carousel-image {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 4px;
+            display: block;
+        }
 
-/* FLECHAS */
-.flecha {
-    background: white;
-    border: none;
-    font-size: 35px;
-    cursor: pointer;
-    padding: 10px;
-}
+        /* RIGHT ACTION BUTTONS */
+        .action-buttons-container {
+            position: absolute;
+            right: 20px;
+            top: 180px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 200px;
+        }
 
-.flecha{
-    background:white;
-    border:none;
-    font-size:35px;
-    cursor:pointer;
-    padding:10px;
-}
+        .btn-action {
+            background-color: #82C8EE;
+            color: #000000;
+            font-weight: bold;
+            font-size: 13px;
+            padding: 12px 10px;
+            border-radius: 10px;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
 
-.ventana{
-    width:600px;
-    overflow:hidden;
-}
+        .btn-action:hover {
+            background-color: #6ebbe3;
+        }
 
-.slider{
-    display:flex;
-    transition:transform 0.4s ease;
-}
+        .btn-action:active {
+            transform: scale(0.98);
+        }
 
-.card{
-    min-width:600px;
-    background:white;
-    border-radius:12px;
-    box-shadow:0 4px 12px rgba(0,0,0,0.2);
-}
+        /* FOOTER STYLES */
+        footer {
+            background-color: #82C8EE;
+            padding: 8px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            font-weight: bold;
+            color: #000000;
+            border-top: 1px solid #70b8df;
+            flex-wrap: flex;
+        }
 
-.card img{
-    width:100%;
-    height:300px;
-    object-fit:cover;
-}
+        .footer-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
 
-.texto{
-    padding:12px;
-    font-weight:bold;
-}
+        .footer-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
 
-    /* ================= FOOTER ================= */
-    footer{
-        background:skyblue;
-        padding:12px 20px;
-        margin-top:auto;
-        position:relative;
-    }
+        .footer-btn {
+            background: #ffffff;
+            border: 1px solid #ccc;
+            font-size: 9px;
+            padding: 1px 4px;
+            border-radius: 2px;
+            cursor: pointer;
+        }
 
-    /* BARRA PRINCIPAL */
-    .footer-line{
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        gap:20px;
-        font-size:14px; /* 🔥 más grande */
-    }
+        .footer-center {
+            display: flex;
+            gap: 20px;
+        }
 
-    /* ELEMENTOS */
-    .item{
-        display:flex;
-        align-items:center;
-        gap:8px;
-        white-space:nowrap;
-    }
+        .footer-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-    /* TÍTULOS MÁS VISIBLES */
-    .item strong{
-        font-size:14px;
-    }
+        .entity-logo {
+            height: 20px;
+            width: auto;
+            background-color: white;
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
 
-    /* TEXTO NORMAL */
-    .item span{
-        font-size:13px;
-    }
+        .copyright-badge {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+        }
 
-    /* ÍCONOS MÁS GRANDES */
-    .item img{
-        width:38px;
-        height:auto;
-    }
+        .circle-c {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #000;
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            font-weight: normal;
+        }
+
+        /* RESPONSIVE LAYOUT FOR SMALL SCREENS */
+        @media (max-width: 900px) {
+            .social-box, .action-buttons-container, .accessibility-icon {
+                position: static;
+                transform: none;
+                margin: 10px auto;
+            }
+
+            .action-buttons-container {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            main {
+                padding-bottom: 30px;
+            }
+
+            footer {
+                flex-direction: column;
+                gap: 8px;
+                text-align: center;
+            }
+
+            .footer-left, .footer-center, .footer-right {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+        }
     </style>
-    </head>
-
-    <body>
-
-    <!-- ACCESIBILIDAD -->
-    <div class="accesibilidad" onclick="alert('Opciones de accesibilidad')">
-        <img src="img/Logoayuda.PNG">
-    </div>
-
-    <!-- BOTONES FIJOS -->
-    <div class="acciones">
-        <button class="btn" onclick="location.href='paginas/Registro.html'">REGÍSTRATE</button>
-        <button class="btn" onclick="window.location.href='paginas/citas.html'">
-        AGENDA TU CITA
-    </button>
-    </div>
+</head>
+<body>
 
     <!-- HEADER -->
     <header>
+        <!-- LOGO PRO SALUD -->
+        <a href="index.html" class="logo-container" title="Inicio Pro Salud">
+            <svg class="logo-icon" viewBox="0 0 24 24">
+                <path d="M19 10.5V6h-3c0-1.66-1.34-3-3-3s-3 1.34-3 3H7v4.5c0 2.21 1.79 4 4 4v2.08c-1.42.39-2.5 1.63-2.5 3.17 0 1.79 1.46 3.25 3.25 3.25s3.25-1.46 3.25-3.25c0-1.54-1.08-2.78-2.5-3.17V14.5c2.21 0 4-1.79 4-4zM12 4.5c.83 0 1.5.67 1.5 1.5h-3c0-.83.67-1.5 1.5-1.5z"/>
+            </svg>
+            <div class="logo-text">
+                <span class="logo-title">PRO SALUD</span>
+                <span class="logo-subtitle">ATENCIÓN MÉDICA INTEGRAL</span>
+            </div>
+        </a>
 
-        <div class="logo">
-            <img src="img/Prosalud.png">
-        </div>
-
+        <!-- NAVIGATION -->
         <nav>
-            <span class="activo">Inicio</span>
-            <a href="paginas/Nosotros.html">Nosotros</a>
-            <a href="#">Servicios</a>
-            <a href="#">Transparencia</a>
-            <a href="paginas/login.html">Iniciar sesión</a>
+            <a href="index.html" class="nav-btn">Inicio</a>
+            <a href="Nosotros.html" class="nav-btn">Nosotros</a>
+            <a href="Servicios.html" class="nav-btn">Servicios</a>
+            <a href="Transparencia.html" class="nav-btn">Transparencia</a>
+            <a href="login.html" class="nav-btn">Iniciar sesión</a>
         </nav>
 
-        <div class="buscador">
-            <input type="text" placeholder="Buscar">
-            <button>🔍</button>
+        <!-- SEARCH -->
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Buscar ...">
+            <svg class="search-icon" viewBox="0 0 24 24">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
         </div>
-
     </header>
 
-<!-- NOTICIAS -->
-<div class="noticias">
+    <!-- MAIN CONTENT -->
+    <main>
+        <!-- ACCESSIBILITY FLOATING ICON -->
+        <div class="accessibility-icon" title="Opciones de Accesibilidad" onclick="alert('Accesibilidad activada')">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm9 7h-6v13h-2v-6h-2v6H9V9H3V7h18v2z"/>
+            </svg>
+        </div>
 
-    <div class="titulo-noticias">Novedades / Noticias</div>
-
-    <div class="carrusel">
-
-        <button class="flecha" onclick="mover(-1)">&#10094;</button>
-
-        <div class="ventana">
-            <div class="slider" id="slider">
-
-                <div class="card">
-                    <div class="texto">
-                        Jornada de Vacunación contra la Fiebre Amarilla
-                    </div>
-                    <img src="img/medico1.png">
-                </div>
-
-                <div class="card">
-                    <div class="texto">
-                        Campaña de Salud Preventiva y Chequeos Médicos
-                    </div>
-                    <img src="img/medico2.png">
-                </div>
-
+        <!-- SOCIAL MEDIA BOX -->
+        <div class="social-box">
+            <div class="social-title">Redes Sociales</div>
+            <div class="social-links">
+                <span>WhatsApp</span>
+                <span>Facebook</span>
+                <span>Instagram</span>
             </div>
         </div>
 
-        <button class="flecha" onclick="mover(1)">&#10095;</button>
+        <!-- NOVEDADES / NOTICIAS -->
+        <section class="news-section">
+            <h1 class="news-title">Novedades / Noticias</h1>
 
-    </div>
-</div>
+            <div class="carousel-container">
+                <span class="carousel-arrow" onclick="prevSlide()">&lt;</span>
+                
+                <div class="carousel-card">
+                    <div class="carousel-header">Jornada de Vacunación contra la Fiebre Amarilla</div>
+                    <img id="carousel-img" src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=800&q=80" alt="Médicos Pro Salud" class="carousel-image">
+                </div>
 
-<!-- REDES -->
-<div class="redes-sociales">
+                <span class="carousel-arrow" onclick="nextSlide()">&gt;</span>
+            </div>
+        </section>
 
-    <div class="titulo">Redes Sociales</div>
+        <!-- ACTION BUTTONS RIGHT SIDE -->
+        <div class="action-buttons-container">
+            <a href="Registro.html" class="btn-action">REGÍSTRATE</a>
+            <a href="Registro.html" class="btn-action">AGENDA TU CITA</a>
+        </div>
+    </main>
 
-    <div class="redes">
-        <a href="#">WhatsApp</a>
-        <a href="#">Facebook</a>
-        <a href="#">Instagram</a>
-    </div>
-
-</div>
-
-<!-- FOOTER -->
-<footer>
-
-    <div class="footer-line">
-
-        <div class="item">
-            <strong>Derechos Pacientes</strong>
-            <img src="img/acrobat.png">
-            <span>Leer</span>
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-left">
+            <div class="footer-item">
+                <span>Derechos Pacientes</span>
+                <button class="footer-btn">Leer</button>
+            </div>
+            <div class="footer-item">
+                <span>Derechos Usuarios</span>
+                <button class="footer-btn">Leer</button>
+            </div>
         </div>
 
-        <div class="item">
-            <strong>Derechos Usuarios</strong>
-            <img src="img/acrobat.png">
-            <span>Leer</span>
+        <div class="footer-center">
+            <div><strong>Horarios</strong> Lun-Vie 07-17 | Sáb 08-12 | Dom cerrado</div>
+            <div><strong>Sede</strong> Cra. 19 #18-15 Bogotá</div>
         </div>
 
-        <div class="item">
-            <strong>Horarios</strong>
-            <span>Lun-Vie 07-17 | Sáb 08-12 | Dom cerrado</span>
+        <div class="footer-right">
+            <!-- Simulated institutional logos -->
+            <div style="background:#fff; padding:2px 5px; border-radius:2px; font-size:8px; font-weight:bold; color:#000;">CONTROL</div>
+            <div style="background:#fff; padding:2px 5px; border-radius:2px; font-size:8px; font-weight:bold; color:green;">Supersalud</div>
+            
+            <div class="copyright-badge">
+                <span class="circle-c">C</span>
+                <span>Prosalud 2026</span>
+            </div>
         </div>
+    </footer>
 
-        <div class="item">
-            <strong>Sede</strong>
-            <span>Cra. 19 #18-15 Bogotá</span>
-        </div>
+    <script>
+        // CAROUSEL SIMULATION
+        const images = [
+            "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=800&q=80",
+            "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80"
+        ];
+        let currentIdx = 0;
 
-        <div class="item">
-            <img src="img/Contraloria.PNG">
-            <img src="img/Ministerio de Salud.PNG">
-            <img src="img/wasap.PNG">
-            <img src="img/Supersalud.PNG">
-        </div>
+        function nextSlide() {
+            currentIdx = (currentIdx + 1) % images.length;
+            document.getElementById('carousel-img').src = images[currentIdx];
+        }
 
-        <div class="item">
-            <img src="img/Copyright.PNG">
-            <span>Prosalud 2026</span>
-        </div>
-
-    </div>
-
-</footer>
-
-<!-- SCRIPT -->
-<script>
-let posicion = 0;
-
-function mover(dir){
-    const slider = document.getElementById("slider");
-    const total = slider.children.length;
-
-    posicion += dir;
-
-    if(posicion < 0){
-        posicion = total - 1;
-    }
-
-    if(posicion >= total){
-        posicion = 0;
-    }
-
-    slider.style.transform = "translateX(" + (-600 * posicion) + "px)";
-}
-</script>
-
+        function prevSlide() {
+            currentIdx = (currentIdx - 1 + images.length) % images.length;
+            document.getElementById('carousel-img').src = images[currentIdx];
+        }
+    </script>
 </body>
 </html>
