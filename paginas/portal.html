@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google" content="notranslate">
+  <title>Portal ProSalud</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Arial, Helvetica, sans-serif; color: #333; background: #fff; }
+
+    /* Encabezado azul claro */
+    .header { background: #87CEEB; display: flex; justify-content: space-between;
+              align-items: center; padding: 12px 30px; }
+    .logo { background: #1e4f9c; color: #fff; font-weight: bold; padding: 8px 14px; border-radius: 4px; }
+    .header button { background: #fff; border: 1px solid #333; padding: 6px 12px;
+                     font-weight: bold; cursor: pointer; border-radius: 3px; }
+
+    /* Barra superior de información */
+    .info-bar { display: flex; flex-wrap: wrap; gap: 25px; padding: 10px 30px;
+                font-size: 12px; border-bottom: 1px solid #ddd; }
+    .info-bar b { margin-right: 4px; }
+
+    /* Barra gris con "Inicio" */
+    .breadcrumb { background: #555; color: #fff; padding: 8px 30px; font-size: 12px; }
+
+    .contenedor { display: flex; flex-wrap: wrap; gap: 40px; padding: 30px; max-width: 1100px; margin: auto; }
+    .saludo { flex: 1 1 320px; }
+    .saludo h2 { margin: 0; font-size: 22px; }
+    .saludo h1 { margin: 5px 0 15px; font-size: 30px; font-weight: normal; }
+    .saludo p { font-size: 14px; color: #555; }
+
+    /* Tarjeta de datos */
+    .datos { flex: 1 1 380px; }
+    .dato { display: flex; gap: 14px; padding: 14px; border-bottom: 1px solid #e3e3e3; align-items: center; }
+    .dato .icono { width: 36px; height: 36px; border-radius: 50%; background: #87CEEB;
+                   display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .dato small { display: block; font-size: 11px; color: #777; text-transform: uppercase; }
+    .dato strong { font-size: 14px; }
+
+    /* Servicios */
+    .servicios { max-width: 1100px; margin: 0 auto; padding: 0 30px 40px; }
+    .servicios h3 { font-size: 15px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+    .tarjeta { border: 1px solid #ccc; border-radius: 6px; padding: 18px; display: flex;
+               gap: 12px; align-items: center; background: #fff; cursor: pointer; text-decoration: none; color: #333; }
+    .tarjeta:hover { border-color: #87CEEB; box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+    .tarjeta span.i { font-size: 26px; }
+    .tarjeta b { font-size: 14px; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="logo">PRO SALUD</div>
+    <button id="btnSalir">Cerrar sesión</button>
+  </div>
+
+  <div class="info-bar">
+    <div><b>Derechos Pacientes</b> Leer</div>
+    <div><b>Derechos Usuarios</b> Leer</div>
+    <div><b>Horarios</b> Lun-Vie 07-17 | Sáb 08-12 | Dom cerrado</div>
+    <div><b>Sede</b> Cra. 19 #18-15 Bogotá</div>
+    <div style="margin-left:auto"><b>Prosalud 2026</b></div>
+  </div>
+
+  <div class="breadcrumb">Inicio</div>
+
+  <div class="contenedor">
+    <div class="saludo">
+      <h2>Servicios a un clic</h2>
+      <h1>Hola, <span id="nombreUsuario"></span></h1>
+      <p>Realiza fácilmente tus procesos con ProSalud.<br>
+         ¡Conoce aquí las soluciones virtuales que tenemos especialmente para ti!</p>
+    </div>
+
+    <div class="datos">
+      <div class="dato">
+        <div class="icono">🩺</div>
+        <div><small>Profesional asignado</small><strong>Por asignar</strong></div>
+      </div>
+      <div class="dato">
+        <div class="icono">🏥</div>
+        <div><small>Estado de afiliación</small><strong>Activo</strong></div>
+      </div>
+      <div class="dato">
+        <div class="icono">📍</div>
+        <div><small>IPS actual</small><strong>Cra 19 # 18 - 15 Bogotá</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="servicios">
+    <h3>Los servicios más utilizados</h3>
+    <div class="grid">
+      <a class="tarjeta" href="citas.html"><span class="i">📅</span><b>Solicitud y cancelación citas médico general</b></a>
+      <a class="tarjeta" href="citas.html"><span class="i">✅</span><b>Solicitud y cancelación citas ayudas diagnósticas</b></a>
+      <a class="tarjeta" href="#"><span class="i">📋</span><b>Historia clínica</b></a>
+      <a class="tarjeta" href="#"><span class="i">💊</span><b>Medicamentos</b></a>
+    </div>
+  </div>
+
+  <script>
+    // Leer los datos guardados al iniciar sesión
+    const datos = sessionStorage.getItem('paciente');
+    if (!datos) {
+      window.location.href = 'login.html';   // si no hay sesión, vuelve al login
+    } else {
+      const paciente = JSON.parse(datos);
+      document.getElementById('nombreUsuario').textContent = paciente.nombres.toUpperCase();
+    }
+
+    document.getElementById('btnSalir').addEventListener('click', () => {
+      sessionStorage.removeItem('paciente');
+      window.location.href = '../index.html';
+    });
+  </script>
+</body>
+</html>
