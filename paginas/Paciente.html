@@ -2,6 +2,8 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="google" content="notranslate">
 <title>Registro de Paciente - ProSalud</title>
 
 <style>
@@ -314,18 +316,22 @@ async function registrarPaciente(){
 
         const resultado = await respuesta.json();
 
-        if(respuesta.ok){
+                if(respuesta.ok){
             alert("✅ Registro exitoso.\n\nEl paciente fue registrado correctamente.");
             window.location.href = "citas.html";
         }else{
-            alert("❌ Error al registrar: " + resultado.mensaje);
+            const detalle = resultado.error || "";
+            if(detalle.includes("Duplicate")){
+                alert("⚠️ Ya existe un paciente registrado con ese número de documento o correo.");
+            }else{
+                alert("❌ Error al registrar: " + resultado.mensaje + "\n" + detalle);
+            }
         }
 
     }catch(error){
         console.error(error);
-        alert("❌ No se pudo conectar con el servidor. Verifica que esté corriendo (node app.js) y que MySQL esté encendido en XAMPP.");
+        alert("❌ No se pudo conectar con el servidor. Espera un minuto y vuelve a intentar.");
     }
-}
 </script>
 
 </body>
