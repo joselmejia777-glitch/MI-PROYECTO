@@ -137,6 +137,11 @@ input, select{
     font-weight:bold;
 }
 
+.btn:disabled{
+    opacity:0.6;
+    cursor:wait;
+}
+
 /* ================= ACCESIBILIDAD ================= */
 .contenedor-accesibilidad{
     position:fixed;
@@ -167,7 +172,7 @@ input, select{
 <header>
 
     <div class="logo">
-        <img src="../img/Prosalud.png">
+        <img src="../img/Prosalud.png" alt="ProSalud">
     </div>
 
     <nav>
@@ -179,9 +184,9 @@ input, select{
     </nav>
 
     <div class="search">
-        <button>
+        <button type="button">
             Buscar ...
-            <img src="../img/Lupa.PNG">
+            <img src="../img/Lupa.PNG" alt="Buscar">
         </button>
     </div>
 
@@ -241,28 +246,28 @@ input, select{
 
         <div class="checkbox">
             <input type="checkbox" id="aceptaTerminos">
-            <label>
-    Acepto los
-    <span class="link-azul">Términos del servicio</span>,
-    <span class="link-azul">Política de privacidad</span>
-    y <span class="link-azul">Ley de datos personales</span>
-</label>
+            <label for="aceptaTerminos">
+                Acepto los
+                <span class="link-azul">Términos del servicio</span>,
+                <span class="link-azul">Política de privacidad</span>
+                y <span class="link-azul">Ley de datos personales</span>
+            </label>
         </div>
 
         <div class="botones">
-            <button class="btn" onclick="registrarPaciente()">
-           Registrar Paciente
+            <button type="button" class="btn" id="btnRegistrar" onclick="registrarPaciente()">
+                Registrar Paciente
             </button>
-            <button class="btn" onclick="window.location.href='citas.html'">Cancelar</button>
+            <button type="button" class="btn" onclick="window.location.href='citas.html'">Cancelar</button>
         </div>
 
     </div>
 
 </div>
 
-<!-- ACCESIBILIDAD (SOLO UNA VEZ) -->
+<!-- ACCESIBILIDAD -->
 <div class="contenedor-accesibilidad" onclick="alert('Opciones de accesibilidad')">
-    <img src="../img/Logoayuda.PNG">
+    <img src="../img/Logoayuda.PNG" alt="Accesibilidad">
 </div>
 
 <!-- SCRIPT -->
@@ -281,7 +286,6 @@ function togglePassword(id, icon){
 
 async function registrarPaciente(){
 
-    // Validación básica de contraseñas
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
 
@@ -290,33 +294,41 @@ async function registrarPaciente(){
         return;
     }
 
-    // Recolectar datos del formulario
     const datos = {
         tipo_documento: document.getElementById('tipo_documento').value,
-        numero_documento: document.getElementById('numero_documento').value,
-        nombres: document.getElementById('nombres').value,
-        apellidos: document.getElementById('apellidos').value,
+        numero_documento: document.getElementById('numero_documento').value.trim(),
+        nombres: document.getElementById('nombres').value.trim(),
+        apellidos: document.getElementById('apellidos').value.trim(),
         fecha_nacimiento: document.getElementById('fecha_nacimiento').value,
         sexo: document.getElementById('sexo').value,
-        telefono: document.getElementById('telefono').value,
-        correo: document.getElementById('correo').value,
-        direccion: document.getElementById('direccion').value,
+        telefono: document.getElementById('telefono').value.trim(),
+        correo: document.getElementById('correo').value.trim(),
+        direccion: document.getElementById('direccion').value.trim(),
         municipio: document.getElementById('municipio').value,
         contrasena: password
     };
 
+    const boton = document.getElementById('btnRegistrar');
+    boton.disabled = true;
+    boton.textContent = 'Registrando... (puede tardar si el servidor estaba dormido)';
+
+    const controlador = new AbortController();
+    const temporizador = setTimeout(() => controlador.abort(), 90000);
+
     try{
+        console.log('Enviando registro...', datos.correo);
+
         const respuesta = await fetch('https://mi-proyecto-y2me.onrender.com/pacientes', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(datos)
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(datos),
+            signal: controlador.signal
         });
 
+        console.log('Respuesta del servidor:', respuesta.status);
         const resultado = await respuesta.json();
 
-                if(respuesta.ok){
+        if(respuesta.ok){
             alert("✅ Registro exitoso.\n\nEl paciente fue registrado correctamente.");
             window.location.href = "citas.html";
         }else{
@@ -330,8 +342,17 @@ async function registrarPaciente(){
 
     }catch(error){
         console.error(error);
-        alert("❌ No se pudo conectar con el servidor. Espera un minuto y vuelve a intentar.");
+        if(error.name === 'AbortError'){
+            alert("⏱️ El servidor tardó demasiado. Espera un momento y vuelve a intentar.");
+        }else{
+            alert("❌ No se pudo conectar con el servidor. Espera un minuto y vuelve a intentar.");
+        }
+    }finally{
+        clearTimeout(temporizador);
+        boton.disabled = false;
+        boton.textContent = 'Registrar Paciente';
     }
+}
 </script>
 
 </body>
