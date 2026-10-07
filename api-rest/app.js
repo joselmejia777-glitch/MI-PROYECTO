@@ -44,7 +44,43 @@ app.post('/pacientes', async (req, res) => {
         res.status(500).json({ mensaje: 'Error al registrar paciente', error: error.message });
     }
 });
+// Ruta para Iniciar Sesión (Login)
+app.post('/login', async (req, res) => {
+  const { correo, contrasena } = req.body;
 
+  if (!correo || !contrasena) {
+    return res.status(400).json({ mensaje: 'Escribe tu correo y contraseña' });
+  }
+
+  try {
+    // Buscar si el paciente existe en la base de datos
+    const [filas] = await conexion.query(
+      'SELECT * FROM pacientes WHERE correo_electronico = ?', 
+      [correo]
+    );
+
+    if (filas.length === 0) {
+      return res.status(401).json({ mensaje: 'Correo no registrado' });
+    }
+
+    const paciente = filas[0];
+
+    // Verificar si la contraseña coincide
+    if (paciente.contrasena !== contrasena) {
+      return res.status(401).json({ mensaje: 'Contraseña incorrecta' });
+    }
+
+    // Responder con éxito si los datos son correctos
+    res.json({
+      mensaje: 'Inicio de sesión exitoso',
+      paciente: paciente
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: 'Error interno en el servidor', error: error.message });
+  }
+});
 // Configurar el puerto del servidor
 const PORT = 10000;
 
