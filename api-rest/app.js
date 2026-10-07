@@ -2,7 +2,6 @@
 const express = require('express');
 const cors = require('cors');
 const conexion = require('./conexion');
-const dns = require('dns').promises;
 
 // Crear la aplicación
 const app = express();
@@ -16,6 +15,7 @@ app.get('/', (req, res) => {
 });
 
 // Ruta para registrar un paciente
+// Ruta para registrar un paciente
 app.post('/pacientes', async (req, res) => {
     try {
         const {
@@ -24,19 +24,10 @@ app.post('/pacientes', async (req, res) => {
             direccion, municipio, contrasena
         } = req.body;
 
-                // Validar formato del correo
+        // Validar solo el formato del correo (rápido, sin consultas externas)
         const regexCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!regexCorreo.test(correo)) {
             return res.status(400).json({ mensaje: 'El correo no tiene un formato válido' });
-        }
-
-        // Validar que el dominio del correo exista y reciba mensajes
-        try {
-            const dominio = correo.split('@')[1];
-            const registros = await dns.resolveMx(dominio);
-            if (!registros || registros.length === 0) throw new Error('sin MX');
-        } catch (e) {
-            return res.status(400).json({ mensaje: 'El dominio del correo no existe o no recibe correos' });
         }
 
         const [resultado] = await conexion.query(
