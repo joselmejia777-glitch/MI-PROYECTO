@@ -2,6 +2,7 @@
 const express = require('express');
 const cors = require('cors');
 const conexion = require('./conexion');
+const dns = require('dns').promises;
 
 // Crear la aplicación
 const app = express();
@@ -23,6 +24,21 @@ app.post('/pacientes', async (req, res) => {
             direccion, municipio, contrasena
         } = req.body;
 
+                // Validar formato del correo
+        const regexCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!regexCorreo.test(correo)) {
+            return res.status(400).json({ mensaje: 'El correo no tiene un formato válido' });
+        }
+
+        // Validar que el dominio del correo exista y reciba mensajes
+        try {
+            const dominio = correo.split('@')[1];
+            const registros = await dns.resolveMx(dominio);
+            if (!registros || registros.length === 0) throw new Error('sin MX');
+        } catch (e) {
+            return res.status(400).json({ mensaje: 'El dominio del correo no existe o no recibe correos' });
+        }
+
         const [resultado] = await conexion.query(
             `INSERT INTO pacientes
             (tipo_documento, numero_documento, nombres, apellidos, fecha_nacimiento, sexo, telefono, correo, direccion, municipio, contrasena)
@@ -37,32 +53,7 @@ app.post('/pacientes', async (req, res) => {
         res.status(500).json({ mensaje: 'Error al registrar paciente', error: error.message });
     }
 });
-// POST /login
-app.post('/login', async (req, res) => {
-    try {
-        const { correo, contrasena } = req.body;
 
-        if (!correo || !contrasena) {
-            return res.status(400).json({ mensaje: 'Faltan datos' });
-        }
-
-        const [filas] = await conexion.query(
-            `SELECT id_paciente, nombres, apellidos
-             FROM pacientes
-             WHERE correo = ? AND contrasena = ?`,
-            [correo, contrasena]
-        );
-
-        if (filas.length === 0) {
-            return res.status(401).json({ mensaje: 'Correo o contraseña incorrectos' });
-        }
-
-        res.json({ mensaje: 'Bienvenido', paciente: filas[0] });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ mensaje: 'Error en el servidor' });
-    }
-});
 // Configurar el puerto del servidor
 const PORT = 10000;
 
