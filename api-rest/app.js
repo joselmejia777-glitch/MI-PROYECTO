@@ -55,7 +55,7 @@ app.post('/login', async (req, res) => {
   try {
     // Buscar si el paciente existe en la base de datos
     const [filas] = await conexion.query(
-      'SELECT * FROM pacientes WHERE correo_electronico = ?', 
+      'SELECT * FROM pacientes WHERE correo = ?', 
       [correo]
     );
 
