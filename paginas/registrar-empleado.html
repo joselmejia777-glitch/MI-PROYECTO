@@ -197,6 +197,8 @@ input, select{
     <div class="titulo">Registro de Empleado</div>
 
     <div class="formulario">
+    
+        <form onsubmit="return validarFormulario(event)"></form>
 
         <select>
             <option>Tipo de documento</option>
@@ -292,6 +294,6 @@ function toggle(id, icon){
     }
 }
 </script>
-
+<script src="validaciones.js"></script>
 </body>
 </html>

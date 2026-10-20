@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Registro de Médico</title>
 <style>
 body{
@@ -138,6 +139,36 @@ z-index:1000;
 .accesibilidad img{
 width:80px;
 height:auto;
+}
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    nav {
+        flex-wrap: wrap;
+    }
+
+    .search {
+        width: 90%;
+    }
+
+    .search input {
+        width: 100%;
+    }
+
+    .contenido {
+        padding: 15px;
+    }
+
+    .botones {
+        flex-wrap: wrap;
+    }
+
+    .accesibilidad img {
+        width: 50px;
+    }
 }
 </style>
 </head>

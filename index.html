@@ -2,286 +2,478 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SaludPro</title>
 
 <style>
 
-/* ================= BASE ================= */
-body{
-    margin:0;
+
+/* ================ BASE ================ */
+* {
+    box-sizing: border-box;
+}
+
+html {
+    width: 100%;
+    overflow-x: clip;
+}
+
+body {
+    margin: 0;
     font-family: Arial, sans-serif;
-    display:flex;
-    flex-direction:column;
-    min-height:100vh;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
-/* ================= HEADER ================= */
-header{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    background:skyblue;
-    padding:12px 20px;
+img {
+    max-width: 100%;
 }
 
-/* LOGO */
-.logo img{
-    width:90px;
+/* ================ HEADER ================ */
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    background: skyblue;
+    padding: 12px 20px;
 }
 
-/* MENÚ CENTRADO */
-nav{
-    flex:1;
-    display:flex;
-    justify-content:center;
-    gap:10px;
+.logo img {
+    display: block;
+    width: 90px;
+    height: auto;
 }
 
-nav a{
-    text-decoration:none;
-    background:white;
-    padding:8px 12px;
-    border-radius:5px;
-    font-weight:bold;
-    color:black;
+nav {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
-nav a:hover{
-    background: rgb(230, 242, 255);
-    color: black; /* para que no herede otro color raro */
+nav a,
+nav .activo {
+    display: inline-block;
+    text-decoration: none;
+    background: white;
+    padding: 9px 12px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 14px;
+    color: black;
 }
 
-/* Estado activo */
-.activo {
+nav a:hover,
+nav .activo {
     background: rgb(230, 242, 255);
     color: black;
-    padding: 10px;
-    display: inline-block; /* importante para que el padding se vea bien */
 }
 
-/* BUSCADOR */
-.buscador{
-    display:flex;
-    align-items:center;
-    background:white;
-    border-radius:20px;
-    padding:5px 10px;
+.buscador {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    background: white;
+    border-radius: 20px;
+    padding: 5px 10px;
 }
 
-.buscador input{
-    border:none;
-    outline:none;
-    width:120px;
+.buscador input {
+    width: 120px;
+    max-width: 100%;
+    min-width: 0;
+    border: none;
+    outline: none;
+    padding: 5px;
 }
 
-.buscador button{
-    border:none;
-    background:none;
-    cursor:pointer;
+.buscador button {
+    border: none;
+    background: none;
+    cursor: pointer;
 }
 
-
-/* ================= ACCESIBILIDAD ================= */
-.accesibilidad{
-    position:fixed;
-    left:20px;
-    top:50%;
-    transform:translateY(-50%);
-    cursor:pointer;
-    z-index:1000;
+/* ================ ACCESIBILIDAD ================ */
+.accesibilidad {
+    position: fixed;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    z-index: 1000;
 }
 
-.accesibilidad img{
-    width:70px;
+.accesibilidad img {
+    display: block;
+    width: 55px;
+    height: auto;
 }
 
-/* ================= BOTONES FIJOS ================= */
-.acciones{
-    position:fixed;
-    right:40px;
-    top:40%;
-    display:flex;
-    flex-direction:column;
-    gap:20px;
-    z-index:1000;
+/* ================ BOTONES DE ACCIÓN ================ */
+.acciones {
+    position: fixed;
+    right: 30px;
+    top: 40%;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    z-index: 1000;
 }
 
-.btn{
-    background:skyblue;
-    border:none;
-    padding:18px;
-    width:260px;
-    font-size:20px;
-    font-weight:bold;
-    border-radius:12px;
-    cursor:pointer;
+.btn {
+    background: skyblue;
+    border: none;
+    padding: 15px;
+    width: 230px;
+    max-width: 100%;
+    font-size: 17px;
+    font-weight: bold;
+    border-radius: 12px;
+    cursor: pointer;
 }
 
-.btn:hover{
-    background:#5fbde5;
+.btn:hover {
+    background: #5fbde5;
 }
 
-/* ================= REDES SOCIALES ================= */
-.redes-sociales{
+/* ================ REDES SOCIALES ================ */
+.redes-sociales {
     position: fixed;
     top: 90px;
     right: 20px;
+    max-width: calc(100% - 30px);
     background: white;
     padding: 15px;
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     text-align: center;
-    z-index: 1000; 
+    z-index: 1000;
 }
 
-.redes-sociales .titulo{
-    font-weight:bold;
-    margin-bottom:10px;
+.redes-sociales .titulo {
+    font-weight: bold;
+    margin-bottom: 10px;
 }
 
-.redes{
-    display:flex;
-    gap:15px;
-    justify-content:center;
+.redes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
 }
 
-.redes a{
-    text-decoration:none;
-    font-weight:bold;
-    color:black;
+.redes a {
+    text-decoration: none;
+    font-weight: bold;
+    color: black;
 }
 
-/* ================= NOTICIAS ================= */
-.noticias{
-    text-align:center;
-    margin-top:30px;
+/* ================ NOTICIAS ================ */
+.noticias {
+    width: 100%;
+    text-align: center;
+    margin: 30px auto;
+    padding: 0 15px;
 }
 
-.titulo-noticias{
-    font-size:24px;
-    font-weight:bold;
-    margin-bottom:20px;
+.titulo-noticias {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
 }
 
 .carrusel {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-}
-
-/* TARJETA */
-.card {
-    min-width: 100%;
-    box-sizing: border-box;
-    border: 1px solid black;    
-    border-radius: 5px;
-    overflow: hidden;          
-}
-
-/* IMAGEN */
-.card img {
+    gap: 8px;
     width: 100%;
-    height: auto;
-    display: block;
+    max-width: 700px;
+    margin: 0 auto;
 }
 
-/* SLIDER */
-.slider {
-    display: flex;
-}
-
-/* VENTANA DEL CARRUSEL */
 .ventana {
     width: 600px;
+    max-width: 100%;
+    min-width: 0;
     overflow: hidden;
 }
 
-/* FLECHAS */
+.slider {
+    display: flex;
+    width: 100%;
+    transition: transform 0.4s ease;
+}
+
+.card {
+    flex: 0 0 100%;
+    min-width: 0;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.card img {
+    display: block;
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+}
+
+.texto {
+    padding: 12px;
+    font-weight: bold;
+}
+
 .flecha {
+    flex: 0 0 auto;
     background: white;
     border: none;
-    font-size: 35px;
+    font-size: 30px;
     cursor: pointer;
-    padding: 10px;
+    padding: 8px;
 }
 
-.flecha{
-    background:white;
-    border:none;
-    font-size:35px;
-    cursor:pointer;
-    padding:10px;
+/* ================ FOOTER ================ */
+footer {
+    background: skyblue;
+    padding: 15px 20px;
+    margin-top: auto;
+    width: 100%;
 }
 
-.ventana{
-    width:600px;
-    overflow:hidden;
+.footer-line {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    font-size: 14px;
 }
 
-.slider{
-    display:flex;
-    transition:transform 0.4s ease;
+.item {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-width: 0;
 }
 
-.card{
-    min-width:600px;
-    background:white;
-    border-radius:12px;
-    box-shadow:0 4px 12px rgba(0,0,0,0.2);
+.item strong {
+    font-size: 14px;
 }
 
-.card img{
-    width:100%;
-    height:300px;
-    object-fit:cover;
+.item span {
+    font-size: 13px;
 }
 
-.texto{
-    padding:12px;
-    font-weight:bold;
+.item img {
+    width: 38px;
+    height: auto;
+    object-fit: contain;
 }
 
-    /* ================= FOOTER ================= */
-    footer{
-        background:skyblue;
-        padding:12px 20px;
-        margin-top:auto;
-        position:relative;
+/* ================ TABLET ================ */
+@media screen and (max-width: 900px) {
+    header {
+        flex-wrap: wrap;
+        justify-content: center;
     }
 
-    /* BARRA PRINCIPAL */
-    .footer-line{
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        gap:20px;
-        font-size:14px; /* 🔥 más grande */
+    .logo {
+        flex: 0 0 auto;
     }
 
-    /* ELEMENTOS */
-    .item{
-        display:flex;
-        align-items:center;
-        gap:8px;
-        white-space:nowrap;
+    nav {
+        flex: 1 1 100%;
+        order: 3;
     }
 
-    /* TÍTULOS MÁS VISIBLES */
-    .item strong{
-        font-size:14px;
+    .buscador {
+        flex: 0 1 220px;
     }
 
-    /* TEXTO NORMAL */
-    .item span{
-        font-size:13px;
+    .acciones {
+        right: 15px;
     }
 
-    /* ÍCONOS MÁS GRANDES */
-    .item img{
-        width:38px;
-        height:auto;
+    .btn {
+        width: 190px;
+        font-size: 15px;
     }
+
+    .redes-sociales {
+        top: 15px;
+        right: 15px;
+    }
+}
+
+/* ================ CELULARES ================ */
+@media screen and (max-width: 600px) {
+    body {
+        min-height: 100vh;
+        padding-bottom: 78px;
+    }
+
+    header {
+        padding: 12px;
+        gap: 12px;
+    }
+
+    .logo img {
+        width: 70px;
+    }
+
+    .buscador {
+        flex: 1 1 160px;
+        max-width: 230px;
+    }
+
+    .buscador input {
+        width: 100%;
+    }
+
+    nav {
+        width: 100%;
+        gap: 7px;
+    }
+
+    nav a,
+    nav .activo {
+        padding: 9px 10px;
+        font-size: 13px;
+    }
+
+    .noticias {
+        margin: 22px auto;
+        padding: 0 10px;
+    }
+
+    .titulo-noticias {
+        font-size: 21px;
+        margin-bottom: 15px;
+    }
+
+    .carrusel {
+        gap: 2px;
+    }
+
+    .ventana {
+        width: calc(100% - 64px);
+        flex: 1 1 auto;
+    }
+
+    .flecha {
+        font-size: 24px;
+        padding: 5px;
+    }
+
+    .card img {
+        height: auto;
+        aspect-ratio: 4 / 3;
+        object-fit: cover;
+    }
+
+    .texto {
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    /* Los botones quedan abajo sin tapar el contenido central */
+    .acciones {
+        top: auto;
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        flex-direction: row;
+        gap: 8px;
+        justify-content: center;
+    }
+
+    .btn {
+        flex: 1 1 0;
+        width: auto;
+        min-width: 0;
+        padding: 12px 5px;
+        font-size: 12px;
+        border-radius: 8px;
+    }
+
+    .accesibilidad {
+        left: 8px;
+        top: auto;
+        bottom: 85px;
+        transform: none;
+    }
+
+    .accesibilidad img {
+        width: 38px;
+    }
+
+    /* Las redes pasan al flujo normal para no tapar el menú */
+    .redes-sociales {
+        position: static;
+        width: fit-content;
+        max-width: calc(100% - 20px);
+        margin: 10px auto 20px;
+        padding: 12px;
+    }
+
+    .redes {
+        gap: 10px;
+    }
+
+    .redes a {
+        font-size: 13px;
+    }
+
+    footer {
+        padding: 15px 12px;
+    }
+
+    .footer-line {
+        justify-content: flex-start;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .item {
+        flex: 1 1 100%;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    .item img {
+        width: 30px;
+    }
+}
+
+/* ================ CELULARES MUY ESTRECHOS ================ */
+@media screen and (max-width: 360px) {
+    nav {
+        gap: 5px;
+    }
+
+    nav a,
+    nav .activo {
+        font-size: 12px;
+        padding: 8px;
+    }
+
+    .titulo-noticias {
+        font-size: 19px;
+    }
+
+    .btn {
+        font-size: 11px;
+    }
+}
+
     </style>
     </head>
 
@@ -294,7 +486,7 @@ nav a:hover{
 
     <!-- BOTONES FIJOS -->
     <div class="acciones">
-        <button class="btn" onclick="location.href='paginas/registro.html'">REGÍSTRATE</button>
+        <button class="btn" onclick="location.href='paginas/Registro.html'">REGÍSTRATE</button>
         <button class="btn" onclick="window.location.href='paginas/citas.html'">
         AGENDA TU CITA
     </button>
@@ -309,7 +501,7 @@ nav a:hover{
 
         <nav>
             <span class="activo">Inicio</span>
-            <a href="paginas/nosotros.html">Nosotros</a>
+            <a href="paginas/Nosotros.html">Nosotros</a>
             <a href="#">Servicios</a>
             <a href="#">Transparencia</a>
             <a href="paginas/login.html">Iniciar sesión</a>
@@ -414,24 +606,47 @@ nav a:hover{
 
 <!-- SCRIPT -->
 <script>
+
+<script>
 let posicion = 0;
 
-function mover(dir){
+function mover(dir) {
     const slider = document.getElementById("slider");
+    const ventana = slider.parentElement;
     const total = slider.children.length;
 
     posicion += dir;
 
-    if(posicion < 0){
+    if (posicion < 0) {
         posicion = total - 1;
     }
 
-    if(posicion >= total){
+    if (posicion >= total) {
         posicion = 0;
     }
 
-    slider.style.transform = "translateX(" + (-600 * posicion) + "px)";
+    // Calcula el ancho real de la ventana del carrusel
+    const ancho = ventana.clientWidth;
+
+    slider.style.transform =
+        "translateX(-" + (ancho * posicion) + "px)";
 }
+
+// Recalcula la posición si cambia el tamaño de la pantalla
+window.addEventListener("resize", function () {
+    const slider = document.getElementById("slider");
+    const ventana = slider.parentElement;
+
+    slider.style.transition = "none";
+    slider.style.transform =
+        "translateX(-" + (ventana.clientWidth * posicion) + "px)";
+
+    // Reactiva la animación después del ajuste
+    requestAnimationFrame(function () {
+        slider.style.transition = "";
+    });
+});
+
 </script>
 
 </body>
