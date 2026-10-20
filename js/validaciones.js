@@ -1,5 +1,5 @@
 function validarFormulario(event) {
-    // 1. Capturar todos los campos obligatorios del formulario
+    // 1. Capturar todos los campos obligatorios usando sus ID del HTML
     const cedula = document.getElementById("cedula") ? document.getElementById("cedula").value.trim() : "";
     const nombre = document.getElementById("nombre") ? document.getElementById("nombre").value.trim() : "";
     const fechaNacimiento = document.getElementById("fecha_nacimiento") ? document.getElementById("fecha_nacimiento").value.trim() : "";
@@ -11,7 +11,7 @@ function validarFormulario(event) {
     // ---------------------------------------------------------
     if (cedula === "" || nombre === "" || fechaNacimiento === "" || correo === "" || password === "") {
         alert("⚠️ Por favor, complete todos los campos obligatorios (incluyendo la fecha de nacimiento) antes de registrar.");
-        event.preventDefault(); // Detiene el envío
+        event.preventDefault(); // Detiene el envío y evita el error de la base de datos
         return false;
     }
 
@@ -26,5 +26,6 @@ function validarFormulario(event) {
         return false;
     }
 
+    // Si todo está correcto, permite el envío de datos
     return true;
 }
