@@ -113,31 +113,76 @@ nav .activo {
     height: auto;
 }
 
-/* ================ BOTONES DE ACCIÓN ================ */
+/* ================ AVISO "AGENDA TU CITA" (botón fijo, letras viajan en horizontal) ================ */
 .acciones {
     position: fixed;
     right: 30px;
     top: 40%;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
     z-index: 1000;
 }
 
-.btn {
-    background: skyblue;
-    border: none;
-    padding: 15px;
-    width: 230px;
+/* El botón NO se mueve */
+.aviso-cita {
+    display: flex;
+    align-items: center;
+    position: relative;
+    width: 250px;
     max-width: 100%;
-    font-size: 17px;
-    font-weight: bold;
+    height: 70px;
+    overflow: hidden;
+    background: #000;
+    border: 3px solid #1e90ff;
     border-radius: 12px;
+    box-shadow: 0 0 12px rgba(30, 144, 255, 0.8);
+    text-decoration: none;
     cursor: pointer;
 }
 
-.btn:hover {
-    background: #5fbde5;
+/* Cinta de letras que se desplaza de derecha a izquierda sin cortes */
+.aviso-texto {
+    display: flex;
+    flex-shrink: 0;
+    width: max-content;
+    animation: viaje 9s linear infinite;
+}
+
+.aviso-cara {
+    flex-shrink: 0;
+    padding-right: 50px;
+    white-space: nowrap;
+    text-transform: uppercase;
+    font-size: 20px;
+    font-weight: bold;
+    color: #1e90ff;
+    text-shadow: 0 0 8px rgba(30, 144, 255, 0.9);
+}
+
+/* La cinta lleva el texto dos veces; al llegar a la mitad vuelve a empezar */
+@keyframes viaje {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+
+/* Al pasar el mouse el texto se detiene */
+.aviso-cita:hover .aviso-texto {
+    animation-play-state: paused;
+}
+
+/* Respeta a quienes tienen desactivadas las animaciones */
+@media (prefers-reduced-motion: reduce) {
+    .aviso-texto {
+        animation: none;
+        width: 100%;
+    }
+    .aviso-cara {
+        white-space: normal;
+        padding: 0 10px;
+        text-align: center;
+        font-size: 15px;
+    }
+    .aviso-atras {
+        display: none;
+    }
 }
 
 /* ================ REDES SOCIALES ================ */
@@ -302,9 +347,13 @@ footer {
         right: 15px;
     }
 
-    .btn {
-        width: 190px;
-        font-size: 15px;
+    .aviso-cita {
+        width: 210px;
+        height: 64px;
+    }
+
+    .aviso-cara {
+        font-size: 17px;
     }
 
     .redes-sociales {
@@ -384,24 +433,24 @@ footer {
         padding: 10px;
     }
 
-    /* Los botones quedan abajo sin tapar el contenido central */
+    /* El aviso queda abajo, centrado, sin tapar el contenido */
     .acciones {
         top: auto;
         left: 10px;
         right: 10px;
         bottom: 10px;
-        flex-direction: row;
-        gap: 8px;
+        display: flex;
         justify-content: center;
     }
 
-    .btn {
-        flex: 1 1 0;
-        width: auto;
-        min-width: 0;
-        padding: 12px 5px;
-        font-size: 12px;
-        border-radius: 8px;
+    .aviso-cita {
+        width: 100%;
+        max-width: 340px;
+        height: 60px;
+    }
+
+    .aviso-cara {
+        font-size: 17px;
     }
 
     .accesibilidad {
@@ -469,8 +518,8 @@ footer {
         font-size: 19px;
     }
 
-    .btn {
-        font-size: 11px;
+    .aviso-cara {
+        font-size: 15px;
     }
 }
 
@@ -484,12 +533,14 @@ footer {
         <img src="img/Logoayuda.PNG">
     </div>
 
-    <!-- BOTONES FIJOS -->
+    <!-- AVISO FIJO: AGENDA TU CITA REGISTRÁNDOTE AQUÍ -->
     <div class="acciones">
-        <button class="btn" onclick="location.href='paginas/Registro.html'">REGÍSTRATE</button>
-        <button class="btn" onclick="window.location.href='paginas/citas.html'">
-        AGENDA TU CITA
-    </button>
+        <a href="paginas/Registro.html" class="aviso-cita">
+            <div class="aviso-texto">
+                <span class="aviso-cara aviso-frente">Agenda tu cita registrándote aquí</span>
+                <span class="aviso-cara aviso-atras">Agenda tu cita registrándote aquí</span>
+            </div>
+        </a>
     </div>
 
     <!-- HEADER -->
@@ -605,8 +656,6 @@ footer {
 </footer>
 
 <!-- SCRIPT -->
-<script>
-
 <script>
 let posicion = 0;
 
