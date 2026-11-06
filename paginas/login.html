@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" translate="no">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,89 +8,168 @@
   <style>
     * { box-sizing: border-box; }
     body {
-      margin: 0; min-height: 100vh; background: #87CEEB;
-      display: flex; align-items: center; justify-content: center;
-      font-family: Arial, Helvetica, sans-serif;
+      margin: 0; min-height: 100vh; display: flex;
+      align-items: center; justify-content: center;
+      background: #87ceeb; font-family: Arial, sans-serif;
     }
-    .tarjeta {
-      background: #fff; width: 100%; max-width: 520px; padding: 50px;
-      border-radius: 14px; box-shadow: 0 8px 24px rgba(0,0,0,.18);
+    .caja {
+      background: #fff; width: 100%; max-width: 520px;
+      padding: 40px; border-radius: 18px;
+      box-shadow: 0 8px 20px rgba(0,0,0,.2); text-align: center;
     }
-    h2 { text-align: center; margin: 0 0 30px; }
+    h2 { margin: 0 0 30px; }
     input {
-      width: 100%; padding: 14px; margin-bottom: 15px; font-size: 16px;
-      border: 1px solid #777; border-radius: 6px;
+      width: 100%; padding: 14px; margin-bottom: 14px;
+      border: 1px solid #777; border-radius: 8px; font-size: 16px;
     }
-    button {
-      width: 100%; padding: 12px; font-size: 16px; font-weight: bold;
-      background: #87CEEB; border: none; border-radius: 6px; cursor: pointer;
+    .campo-clave { position: relative; }
+    .campo-clave input { padding-right: 50px; }
+    .ojo {
+      position: absolute; right: 12px; top: 12px;
+      background: none; border: none; cursor: pointer; padding: 0;
+      width: 28px; height: 28px;
     }
-    button:hover { background: #6ec0e3; }
-    #mensaje { color: #c0392b; font-size: 14px; text-align: center; min-height: 20px; margin: 0 0 12px; }
-    .enlaces { text-align: center; margin-top: 18px; font-size: 14px; }
-    .enlaces a { color: #1e4f9c; text-decoration: none; }
-    .enlaces a:hover { text-decoration: underline; }
+    .ojo svg { width: 24px; height: 24px; fill: none; stroke: #555; stroke-width: 2; }
+    #mensaje { color: #c0392b; font-size: 14px; min-height: 20px; margin-bottom: 10px; }
+    #btnIngresar {
+      width: 100%; padding: 14px; border: none; border-radius: 8px;
+      background: #87ceeb; font-weight: bold; font-size: 16px; cursor: pointer;
+    }
+    #btnIngresar:disabled { opacity: .6; cursor: wait; }
+    .enlaces { margin-top: 18px; font-size: 14px; }
+    .enlaces a { color: #0b5ea8; text-decoration: none; }
+    .enlaces p { margin: 12px 0; }
+
+    /* Ventana emergente */
+    #fondoModal {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.5); align-items: center; justify-content: center;
+      z-index: 1000;
+    }
+    #fondoModal.activo { display: flex; }
+    .modal {
+      background: #fff; padding: 30px; border-radius: 14px;
+      max-width: 340px; text-align: center;
+      box-shadow: 0 8px 24px rgba(0,0,0,.3);
+    }
+    .modal h3 { margin: 0 0 10px; color: #c0392b; }
+    .modal p { margin: 0 0 20px; }
+    .modal button, .modal a.btn {
+      display: inline-block; padding: 10px 18px; margin: 4px;
+      border: none; border-radius: 8px; font-size: 15px; cursor: pointer;
+      text-decoration: none;
+    }
+    .btn-registro { background: #87ceeb; color: #000; font-weight: bold; }
+    .btn-cerrar { background: #ddd; }
   </style>
 </head>
 <body>
-  <div class="tarjeta">
+  <div class="caja">
     <h2>Iniciar Sesión</h2>
 
-    <input type="email" id="correo" placeholder="Correo electrónico">
-    <input type="password" id="contrasena" placeholder="Contraseña">
+    <form id="formLogin">
+      <input type="email" id="correo" placeholder="Correo electrónico" required>
 
-    <p id="mensaje"></p>
-    <button id="btnIngresar">Ingresar</button>
+      <div class="campo-clave">
+        <input type="password" id="contrasena" placeholder="Contraseña" required>
+        <button type="button" class="ojo" id="btnOjo" aria-label="Mostrar u ocultar contraseña">
+          <svg id="iconoOjo" viewBox="0 0 24 24">
+            <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+      </div>
+
+      <div id="mensaje"></div>
+      <button type="submit" id="btnIngresar">Ingresar</button>
+    </form>
 
     <div class="enlaces">
-      ¿No tienes cuenta? <a href="Paciente.html">Regístrate</a><br><br>
-      <a href="../index.html">← Volver al inicio</a>
+      <p>¿No tienes cuenta? <a href="registrar-paciente.html">Regístrate</a></p>
+      <p><a href="../index.html">← Volver al inicio</a></p>
+    </div>
+  </div>
+
+  <!-- Ventana emergente -->
+  <div id="fondoModal">
+    <div class="modal">
+      <h3>Debe Registrarse</h3>
+      <p>Este correo no está registrado en el sistema.</p>
+      <a class="btn btn-registro" href="registrar-paciente.html">Registrarme</a>
+      <button class="btn-cerrar" id="btnCerrar">Cerrar</button>
     </div>
   </div>
 
   <script>
-    const API = 'https://mi-proyecto-y2me.onrender.com';
-    const mensaje = document.getElementById('mensaje');
-    const boton = document.getElementById('btnIngresar');
+    const API_URL = "https://mi-proyecto-y2me.onrender.com";
 
-    async function iniciarSesion() {
-      const correo = document.getElementById('correo').value.trim();
-      const contrasena = document.getElementById('contrasena').value;
+    const formLogin = document.getElementById("formLogin");
+    const inputClave = document.getElementById("contrasena");
+    const mensaje = document.getElementById("mensaje");
+    const btnIngresar = document.getElementById("btnIngresar");
+    const fondoModal = document.getElementById("fondoModal");
 
-      if (!correo || !contrasena) {
-        mensaje.textContent = 'Escribe tu correo y contraseña';
-        return;
-      }
+    // Ojo: mostrar / ocultar contraseña
+    const ojoAbierto = '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/>';
+    const ojoCerrado = '<path d="M17.94 17.94A10.9 10.9 0 0 1 12 19c-7 0-11-7-11-7a19.8 19.8 0 0 1 5.06-5.94M9.9 4.24A10.9 10.9 0 0 1 12 5c7 0 11 7 11 7a19.9 19.9 0 0 1-3.17 4.19M1 1l22 22"/>';
 
-      mensaje.style.color = '#555';
-      mensaje.textContent = 'Ingresando... (si el servidor estaba dormido puede tardar un poco)';
-      boton.disabled = true;
+    document.getElementById("btnOjo").addEventListener("click", () => {
+      const visible = inputClave.type === "text";
+      inputClave.type = visible ? "password" : "text";
+      document.getElementById("iconoOjo").innerHTML = visible ? ojoAbierto : ojoCerrado;
+    });
+
+    // Ventana emergente
+    document.getElementById("btnCerrar").addEventListener("click", () => {
+      fondoModal.classList.remove("activo");
+    });
+
+    // Enviar login
+    formLogin.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      mensaje.textContent = "";
+      btnIngresar.disabled = true;
+      btnIngresar.textContent = "Ingresando...";
 
       try {
-       const resp = await fetch(`${API}/api/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ correo, contrasena })
+        const respuesta = await fetch(API_URL + "/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            correo: document.getElementById("correo").value.trim(),
+            contrasena: inputClave.value
+          })
         });
-        const data = await resp.json();
 
-        if (resp.ok) {
-          sessionStorage.setItem('paciente', JSON.stringify(data.paciente));
-          window.location.href = 'portal.html';
+        const datos = await respuesta.json();
+
+        if (respuesta.status === 404) {
+          fondoModal.classList.add("activo");       // correo no registrado
+        } else if (!respuesta.ok) {
+          mensaje.textContent = datos.mensaje || "No se pudo iniciar sesión";
         } else {
-          mensaje.style.color = '#c0392b';
-          mensaje.textContent = data.mensaje;
+          // Guardar la sesión como la espera cada portal
+          sessionStorage.setItem("token", datos.token || "");
+          sessionStorage.setItem("rol", datos.rol || "");
+
+          if (datos.rol === "paciente") {
+            sessionStorage.setItem("paciente", JSON.stringify(datos.paciente));
+            window.location.href = "portal.html";
+          } else if (datos.rol === "medico") {
+            sessionStorage.setItem("empleado", JSON.stringify(datos.empleado));
+            window.location.href = "medico.html";
+          } else {
+            // Recepcionista y administrador: sus portales aún no existen
+            sessionStorage.setItem("empleado", JSON.stringify(datos.empleado));
+            mensaje.textContent = "Ingreso correcto. El portal de tu rol está en construcción.";
+          }
         }
       } catch (error) {
-        mensaje.style.color = '#c0392b';
-        mensaje.textContent = 'No se pudo conectar con el servidor';
+        mensaje.textContent = "No se pudo conectar con el servidor";
+      } finally {
+        btnIngresar.disabled = false;
+        btnIngresar.textContent = "Ingresar";
       }
-      boton.disabled = false;
-    }
-
-    boton.addEventListener('click', iniciarSesion);
-    document.getElementById('contrasena').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') iniciarSesion();
     });
   </script>
 </body>

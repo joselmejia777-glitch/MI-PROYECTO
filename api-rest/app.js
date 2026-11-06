@@ -79,9 +79,18 @@ app.post('/login', async (req, res) => {
             }
 
             delete paciente.contrasena;
+
+            const token = jwt.sign(
+                { id: paciente.id_paciente, rol: 'paciente' },
+                SECRETO_JWT,
+                { expiresIn: '2h' }
+            );
+
             return res.json({
                 mensaje: 'Inicio de sesión exitoso',
                 rol: 'paciente',
+                token: token,
+                nombre: paciente.nombres,
                 paciente: paciente
             });
         }
@@ -93,7 +102,7 @@ app.post('/login', async (req, res) => {
         );
 
         if (empleados.length === 0) {
-            return res.status(401).json({ mensaje: 'Correo no registrado' });
+            return res.status(404).json({ mensaje: 'Correo no registrado' });
         }
 
         const empleado = empleados[0];
@@ -106,7 +115,7 @@ app.post('/login', async (req, res) => {
             return res.status(401).json({ mensaje: 'Contraseña incorrecta' });
         }
 
-                delete empleado.contrasena;
+        delete empleado.contrasena;
 
         const token = jwt.sign(
             { id: empleado.id_empleado, rol: empleado.rol },
@@ -118,6 +127,7 @@ app.post('/login', async (req, res) => {
             mensaje: 'Inicio de sesión exitoso',
             rol: empleado.rol,
             token: token,
+            nombre: empleado.nombres,
             empleado: empleado
         });
 
@@ -126,6 +136,7 @@ app.post('/login', async (req, res) => {
         res.status(500).json({ mensaje: 'Error interno en el servidor', error: error.message });
     }
 });
+
 // Guardia: solo deja pasar a quien tenga un token de administrador
 function soloAdministrador(req, res, next) {
     const cabecera = req.headers['authorization'] || '';
