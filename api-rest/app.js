@@ -592,6 +592,50 @@ app.get('/remisiones', permitirRoles('empleado', 'medico', 'administrador'), asy
         res.status(500).json({ mensaje: 'Error al consultar las remisiones', error: error.message });
     }
 });
+
+// ============================================================
+// LISTADOS PARA EL ADMINISTRADOR
+// Nunca devuelven la contraseña
+// ============================================================
+app.get('/admin/pacientes', permitirRoles('administrador'), async (req, res) => {
+    try {
+        const [filas] = await conexion.query(
+            `SELECT id_paciente, tipo_documento, numero_documento, nombres, apellidos,
+                    telefono, correo, municipio,
+                    DATE_FORMAT(fecha_registro, '%Y-%m-%d') AS fecha_registro
+             FROM pacientes
+             ORDER BY id_paciente DESC`
+        );
+        res.json(filas);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: 'Error al listar pacientes', error: error.message });
+    }
+});
+
+app.get('/admin/empleados', permitirRoles('administrador'), async (req, res) => {
+    try {
+        const { rol } = req.query;   // opcional: ?rol=medico o ?rol=empleado
+
+        let sql = `SELECT id_empleado, tipo_documento, numero_documento, nombres, apellidos,
+                          correo, cargo, rol, especialidad, estado
+                   FROM empleados WHERE 1 = 1`;
+        const params = [];
+
+        if (rol) {
+            sql += ' AND rol = ?';
+            params.push(rol);
+        }
+
+        sql += ' ORDER BY id_empleado DESC';
+
+        const [filas] = await conexion.query(sql, params);
+        res.json(filas);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: 'Error al listar empleados', error: error.message });
+    }
+});
 // Configurar el puerto del servidor
 const PORT = 10000;
 

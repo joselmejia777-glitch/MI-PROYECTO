@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="es" translate="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google" content="notranslate">
+  <title>Administrador - ProSalud</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Arial, Helvetica, sans-serif; color: #333; background: #f2f7fb; }
+    .header { background: #87CEEB; display: flex; justify-content: space-between;
+              align-items: center; padding: 12px 20px; flex-wrap: wrap; gap: 10px; }
+    .logo { background: #1e4f9c; color: #fff; font-weight: bold; padding: 8px 14px; border-radius: 4px; }
+    .header button { background: #fff; border: 1px solid #333; padding: 6px 12px;
+                     font-weight: bold; cursor: pointer; border-radius: 3px; }
+    main { max-width: 1100px; margin: 20px auto; padding: 0 16px; }
+    h1 { font-size: 24px; margin: 0 0 4px; }
+    .sub { color: #555; margin: 0 0 20px; }
+
+    .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .tabs button {
+      padding: 10px 18px; border: 1px solid #87CEEB; background: #fff;
+      border-radius: 8px; cursor: pointer; font-weight: bold;
+    }
+    .tabs button.activa { background: #87CEEB; }
+
+    .tarjeta { background: #fff; border-radius: 12px; padding: 18px;
+               box-shadow: 0 3px 10px rgba(0,0,0,.1); margin-bottom: 20px; }
+    .tabla-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { padding: 10px; text-align: left; border-bottom: 1px solid #e3e3e3; white-space: nowrap; }
+    th { background: #eaf6fc; }
+    .vacio { padding: 20px; text-align: center; color: #777; }
+    .estado-activo { color: #1e8e3e; font-weight: bold; }
+    .estado-pendiente { color: #c77700; font-weight: bold; }
+
+    form { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    label { font-size: 13px; color: #555; display: block; margin-bottom: 4px; }
+    input, select { width: 100%; padding: 10px; border: 1px solid #999; border-radius: 6px; font-size: 15px; }
+    .boton-form { grid-column: 1 / -1; }
+    .boton-form button {
+      padding: 12px 24px; background: #87CEEB; border: none; border-radius: 8px;
+      font-weight: bold; font-size: 15px; cursor: pointer;
+    }
+    #mensajeForm { grid-column: 1 / -1; font-size: 14px; min-height: 20px; }
+    .ok { color: #1e8e3e; }
+    .error { color: #c0392b; }
+    #especialidadCaja { display: none; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="logo">PRO SALUD</div>
+    <button id="btnSalir">Cerrar sesión</button>
+  </div>
+
+  <main>
+    <h1>Hola, <span id="nombreAdmin"></span></h1>
+    <p class="sub">Panel del administrador</p>
+
+    <div class="tabs">
+      <button class="activa" data-vista="pacientes">Pacientes</button>
+      <button data-vista="medicos">Médicos</button>
+      <button data-vista="empleados">Empleados</button>
+      <button data-vista="nuevo">+ Pre-registrar personal</button>
+    </div>
+
+    <!-- LISTADOS -->
+    <div class="tarjeta" id="vistaListado">
+      <div class="tabla-wrap">
+        <table>
+          <thead id="encabezado"></thead>
+          <tbody id="cuerpo"></tbody>
+        </table>
+      </div>
+      <div class="vacio" id="vacio" style="display:none;">No hay registros todavía.</div>
+    </div>
+
+    <!-- FORMULARIO DE PRE-REGISTRO -->
+    <div class="tarjeta" id="vistaNuevo" style="display:none;">
+      <form id="formPreregistro">
+        <div>
+          <label>Tipo de documento</label>
+          <select id="tipo_documento" required>
+            <option value="CC">Cédula de ciudadanía</option>
+            <option value="CE">Cédula de extranjería</option>
+            <option value="PA">Pasaporte</option>
+          </select>
+        </div>
+        <div><label>Número de documento</label><input id="numero_documento" required></div>
+        <div><label>Nombres</label><input id="nombres" required></div>
+        <div><label>Apellidos</label><input id="apellidos" required></div>
+        <div><label>Correo</label><input type="email" id="correo" required></div>
+        <div><label>Cargo</label><input id="cargo" placeholder="Ej: Recepcionista" required></div>
+        <div>
+          <label>Rol</label>
+          <select id="rol" required>
+            <option value="empleado">Empleado (recepcionista)</option>
+            <option value="medico">Médico</option>
+          </select>
+        </div>
+        <div id="especialidadCaja">
+          <label>Especialidad</label>
+          <select id="especialidad">
+            <option value="Medicina General">Medicina General</option>
+            <option value="Odontologia">Odontología</option>
+            <option value="Pediatria">Pediatría</option>
+            <option value="Fisioterapia">Fisioterapia</option>
+            <option value="Optometria">Optometría</option>
+          </select>
+        </div>
+        <div id="mensajeForm"></div>
+        <div class="boton-form"><button type="submit">Guardar pre-registro</button></div>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    const API_URL = "https://mi-proyecto-y2me.onrender.com";
+
+    // 1. Protección: solo el administrador entra aquí
+    const token = sessionStorage.getItem("token");
+    const rol = sessionStorage.getItem("rol");
+    const empleadoGuardado = sessionStorage.getItem("empleado");
+
+    if (!token || rol !== "administrador") {
+      window.location.href = "login.html";
+    }
+
+    if (empleadoGuardado) {
+      const e = JSON.parse(empleadoGuardado);
+      document.getElementById("nombreAdmin").textContent = (e.nombres || "").toUpperCase();
+    }
+
+    document.getElementById("btnSalir").addEventListener("click", () => {
+      sessionStorage.clear();
+      window.location.href = "../index.html";
+    });
+
+    // 2. Definición de cada listado
+    const vistas = {
+      pacientes: {
+        ruta: "/admin/pacientes",
+        columnas: [
+          ["numero_documento", "Documento"], ["nombres", "Nombres"], ["apellidos", "Apellidos"],
+          ["correo", "Correo"], ["telefono", "Teléfono"], ["municipio", "Municipio"],
+          ["fecha_registro", "Registro"]
+        ]
+      },
+      medicos: {
+        ruta: "/admin/empleados?rol=medico",
+        columnas: [
+          ["numero_documento", "Documento"], ["nombres", "Nombres"], ["apellidos", "Apellidos"],
+          ["correo", "Correo"], ["especialidad", "Especialidad"], ["estado", "Estado"]
+        ]
+      },
+      empleados: {
+        ruta: "/admin/empleados?rol=empleado",
+        columnas: [
+          ["numero_documento", "Documento"], ["nombres", "Nombres"], ["apellidos", "Apellidos"],
+          ["correo", "Correo"], ["cargo", "Cargo"], ["estado", "Estado"]
+        ]
+      }
+    };
+
+    const encabezado = document.getElementById("encabezado");
+    const cuerpo = document.getElementById("cuerpo");
+    const vacio = document.getElementById("vacio");
+    let vistaActual = "pacientes";
+
+    async function cargarVista(nombre) {
+      vistaActual = nombre;
+      const vista = vistas[nombre];
+
+      encabezado.innerHTML = "";
+      cuerpo.innerHTML = "";
+      vacio.style.display = "none";
+
+      const filaTitulos = document.createElement("tr");
+      vista.columnas.forEach(([, titulo]) => {
+        const th = document.createElement("th");
+        th.textContent = titulo;
+        filaTitulos.appendChild(th);
+      });
+      encabezado.appendChild(filaTitulos);
+
+      try {
+        const respuesta = await fetch(API_URL + vista.ruta, {
+          headers: { "Authorization": "Bearer " + token }
+        });
+
+        if (respuesta.status === 401) {
+          sessionStorage.clear();
+          window.location.href = "login.html";
+          return;
+        }
+
+        const filas = await respuesta.json();
+
+        if (!respuesta.ok || filas.length === 0) {
+          vacio.textContent = respuesta.ok ? "No hay registros todavía." : (filas.mensaje || "Error al cargar");
+          vacio.style.display = "block";
+          return;
+        }
+
+        filas.forEach((fila) => {
+          const tr = document.createElement("tr");
+          vista.columnas.forEach(([campo]) => {
+            const td = document.createElement("td");
+            td.textContent = fila[campo] ?? "";
+            if (campo === "estado") td.className = "estado-" + fila[campo];
+            tr.appendChild(td);
+          });
+          cuerpo.appendChild(tr);
+        });
+      } catch (error) {
+        vacio.textContent = "No se pudo conectar con el servidor";
+        vacio.style.display = "block";
+      }
+    }
+
+    // 3. Pestañas
+    document.querySelectorAll(".tabs button").forEach((boton) => {
+      boton.addEventListener("click", () => {
+        document.querySelectorAll(".tabs button").forEach((b) => b.classList.remove("activa"));
+        boton.classList.add("activa");
+
+        const vista = boton.dataset.vista;
+        const esNuevo = vista === "nuevo";
+        document.getElementById("vistaListado").style.display = esNuevo ? "none" : "block";
+        document.getElementById("vistaNuevo").style.display = esNuevo ? "block" : "none";
+
+        if (!esNuevo) cargarVista(vista);
+      });
+    });
+
+    // 4. Mostrar especialidad solo si el rol es médico
+    document.getElementById("rol").addEventListener("change", (e) => {
+      document.getElementById("especialidadCaja").style.display =
+        e.target.value === "medico" ? "block" : "none";
+    });
+
+    // 5. Enviar pre-registro
+    document.getElementById("formPreregistro").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const mensaje = document.getElementById("mensajeForm");
+      mensaje.className = "";
+      mensaje.textContent = "Guardando...";
+
+      const rolElegido = document.getElementById("rol").value;
+      const datos = {
+        tipo_documento: document.getElementById("tipo_documento").value,
+        numero_documento: document.getElementById("numero_documento").value.trim(),
+        nombres: document.getElementById("nombres").value.trim(),
+        apellidos: document.getElementById("apellidos").value.trim(),
+        correo: document.getElementById("correo").value.trim(),
+        cargo: document.getElementById("cargo").value.trim(),
+        rol: rolElegido
+      };
+      if (rolElegido === "medico") {
+        datos.especialidad = document.getElementById("especialidad").value;
+      }
+
+      try {
+        const respuesta = await fetch(API_URL + "/empleados/preregistro", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token
+          },
+          body: JSON.stringify(datos)
+        });
+        const resultado = await respuesta.json();
+
+        if (respuesta.ok) {
+          mensaje.className = "ok";
+          mensaje.textContent = resultado.mensaje;
+          document.getElementById("formPreregistro").reset();
+          document.getElementById("especialidadCaja").style.display = "none";
+        } else {
+          mensaje.className = "error";
+          mensaje.textContent = resultado.mensaje || "No se pudo guardar";
+        }
+      } catch (error) {
+        mensaje.className = "error";
+        mensaje.textContent = "No se pudo conectar con el servidor";
+      }
+    });
+
+    // Al abrir la página, mostrar pacientes
+    cargarVista("pacientes");
+  </script>
+</body>
+</html>
