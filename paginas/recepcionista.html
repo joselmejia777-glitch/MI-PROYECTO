@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es" translate="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google" content="notranslate">
+  <title>Recepción - ProSalud</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Arial, Helvetica, sans-serif; color: #333; background: #f2f7fb; }
+    .header { background: #87CEEB; display: flex; justify-content: space-between;
+              align-items: center; padding: 12px 20px; flex-wrap: wrap; gap: 10px; }
+    .logo { background: #1e4f9c; color: #fff; font-weight: bold; padding: 8px 14px; border-radius: 4px; }
+    .header button { background: #fff; border: 1px solid #333; padding: 6px 12px;
+                     font-weight: bold; cursor: pointer; border-radius: 3px; }
+    main { max-width: 1200px; margin: 20px auto; padding: 0 16px; }
+    h1 { font-size: 24px; margin: 0 0 4px; }
+    .sub { color: #555; margin: 0 0 20px; }
+    .tarjeta { background: #fff; border-radius: 12px; padding: 18px;
+               box-shadow: 0 3px 10px rgba(0,0,0,.1); margin-bottom: 20px; }
+
+    .filtros { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+               gap: 12px; align-items: end; }
+    label { font-size: 13px; color: #555; display: block; margin-bottom: 4px; }
+    input, select { width: 100%; padding: 10px; border: 1px solid #999; border-radius: 6px; font-size: 15px; }
+    .botones { display: flex; gap: 8px; }
+    .botones button { padding: 10px 16px; border: none; border-radius: 8px;
+                      font-weight: bold; cursor: pointer; }
+    #btnBuscar { background: #87CEEB; }
+    #btnLimpiar { background: #ddd; }
+
+    .tabla-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { padding: 10px; text-align: left; border-bottom: 1px solid #e3e3e3; white-space: nowrap; }
+    th { background: #eaf6fc; }
+    .vacio { padding: 20px; text-align: center; color: #777; display: none; }
+    .total { font-size: 13px; color: #555; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="logo">PRO SALUD</div>
+    <button id="btnSalir">Cerrar sesión</button>
+  </div>
+
+  <main>
+    <h1>Hola, <span id="nombreEmpleado"></span></h1>
+    <p class="sub">Recepción: agenda de citas</p>
+
+    <div class="tarjeta">
+      <div class="filtros">
+        <div><label>Fecha</label><input type="date" id="fFecha"></div>
+        <div>
+          <label>Estado</label>
+          <select id="fEstado">
+            <option value="">Todos</option>
+            <option value="Pendiente">Pendiente</option>
+            <option value="Confirmada">Confirmada</option>
+            <option value="Reprogramada">Reprogramada</option>
+            <option value="Atendida">Atendida</option>
+            <option value="Cancelada">Cancelada</option>
+          </select>
+        </div>
+        <div><label>Documento del paciente</label><input id="fDocumento" placeholder="Número de documento"></div>
+        <div class="botones">
+          <button id="btnBuscar">Buscar</button>
+          <button id="btnLimpiar">Limpiar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tarjeta">
+      <div class="total" id="total"></div>
+      <div class="tabla-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th><th>Hora</th><th>Paciente</th><th>Documento</th>
+              <th>Celular</th><th>Servicio</th><th>Médico</th><th>Estado</th><th>Canal</th>
+            </tr>
+          </thead>
+          <tbody id="cuerpo"></tbody>
+        </table>
+      </div>
+      <div class="vacio" id="vacio">No hay citas con esos filtros.</div>
+    </div>
+  </main>
+
+  <script>
+    const API_URL = "https://mi-proyecto-y2me.onrender.com";
+
+    // Protección: solo recepcionista (empleado) o administrador
+    const token = sessionStorage.getItem("token");
+    const rol = sessionStorage.getItem("rol");
+
+    if (!token || (rol !== "empleado" && rol !== "administrador")) {
+      window.location.href = "login.html";
+    }
+
+    const guardado = sessionStorage.getItem("empleado");
+    if (guardado) {
+      const e = JSON.parse(guardado);
+      document.getElementById("nombreEmpleado").textContent = (e.nombres || "").toUpperCase();
+    }
+
+    document.getElementById("btnSalir").addEventListener("click", () => {
+      sessionStorage.clear();
+      window.location.href = "../index.html";
+    });
+
+    const cuerpo = document.getElementById("cuerpo");
+    const vacio = document.getElementById("vacio");
+    const total = document.getElementById("total");
+
+    const columnas = ["fecha", "hora", "nombre", "identificacion", "celular",
+                      "servicio", "medico", "estado", "canal"];
+
+    async function cargarCitas() {
+      cuerpo.innerHTML = "";
+      vacio.style.display = "none";
+      total.textContent = "Cargando...";
+
+      const params = new URLSearchParams();
+      const fecha = document.getElementById("fFecha").value;
+      const estado = document.getElementById("fEstado").value;
+      const documento = document.getElementById("fDocumento").value.trim();
+      if (fecha) params.append("fecha", fecha);
+      if (estado) params.append("estado", estado);
+      if (documento) params.append("documento", documento);
+
+      try {
+        const respuesta = await fetch(API_URL + "/citas?" + params.toString(), {
+          headers: { "Authorization": "Bearer " + token }
+        });
+
+        if (respuesta.status === 401) {
+          sessionStorage.clear();
+          window.location.href = "login.html";
+          return;
+        }
+
+        const citas = await respuesta.json();
+
+        if (!respuesta.ok) {
+          total.textContent = "";
+          vacio.textContent = citas.mensaje || "Error al cargar las citas";
+          vacio.style.display = "block";
+          return;
+        }
+
+        total.textContent = citas.length + " cita(s)";
+
+        if (citas.length === 0) {
+          vacio.textContent = "No hay citas con esos filtros.";
+          vacio.style.display = "block";
+          return;
+        }
+
+        citas.forEach((cita) => {
+          const tr = document.createElement("tr");
+          columnas.forEach((campo) => {
+            const td = document.createElement("td");
+            td.textContent = cita[campo] ?? "";
+            tr.appendChild(td);
+          });
+          cuerpo.appendChild(tr);
+        });
+      } catch (error) {
+        total.textContent = "";
+        vacio.textContent = "No se pudo conectar con el servidor";
+        vacio.style.display = "block";
+      }
+    }
+
+    document.getElementById("btnBuscar").addEventListener("click", cargarCitas);
+    document.getElementById("btnLimpiar").addEventListener("click", () => {
+      document.getElementById("fFecha").value = "";
+      document.getElementById("fEstado").value = "";
+      document.getElementById("fDocumento").value = "";
+      cargarCitas();
+    });
+
+    cargarCitas();
+  </script>
+</body>
+</html>
