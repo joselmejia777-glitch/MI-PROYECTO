@@ -35,6 +35,28 @@
     th { background: #eaf6fc; }
     .vacio { padding: 20px; text-align: center; color: #777; display: none; }
     .total { font-size: 13px; color: #555; margin-bottom: 10px; }
+    .btn-reprog { background: #87CEEB; border: none; padding: 7px 12px; border-radius: 6px;
+                  font-weight: bold; cursor: pointer; }
+    .btn-reprog:disabled { background: #ddd; color: #888; cursor: not-allowed; }
+    #avisoGeneral { margin-bottom: 12px; font-size: 14px; min-height: 18px; }
+    .ok { color: #1e8e3e; font-weight: bold; }
+    .error { color: #c0392b; font-weight: bold; }
+
+    /* Ventana de reprogramación */
+    #fondoModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5);
+                  align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
+    #fondoModal.activo { display: flex; }
+    .modal { background: #fff; padding: 24px; border-radius: 14px; width: 100%; max-width: 400px;
+             box-shadow: 0 8px 24px rgba(0,0,0,.3); }
+    .modal h3 { margin: 0 0 6px; }
+    .modal .detalle { color: #555; font-size: 14px; margin-bottom: 14px; }
+    .modal .campo { margin-bottom: 12px; }
+    .modal .acciones { display: flex; gap: 8px; margin-top: 16px; }
+    .modal .acciones button { flex: 1; padding: 11px; border: none; border-radius: 8px;
+                              font-weight: bold; cursor: pointer; }
+    #btnGuardar { background: #87CEEB; }
+    #btnCancelarModal { background: #ddd; }
+    #mensajeModal { font-size: 14px; min-height: 18px; margin-top: 8px; }
   </style>
 </head>
 <body>
@@ -57,6 +79,7 @@
             <option value="">Todos</option>
             <option value="Pendiente">Pendiente</option>
             <option value="Confirmada">Confirmada</option>
+            <option value="Programada">Programada</option>
             <option value="Reprogramada">Reprogramada</option>
             <option value="Atendida">Atendida</option>
             <option value="Cancelada">Cancelada</option>
@@ -71,13 +94,15 @@
     </div>
 
     <div class="tarjeta">
+      <div id="avisoGeneral"></div>
       <div class="total" id="total"></div>
       <div class="tabla-wrap">
         <table>
           <thead>
             <tr>
               <th>Fecha</th><th>Hora</th><th>Paciente</th><th>Documento</th>
-              <th>Celular</th><th>Servicio</th><th>Médico</th><th>Estado</th><th>Canal</th>
+              <th>Celular</th><th>Servicio</th><th>Médico</th><th>Estado</th>
+              <th>Canal</th><th>Acción</th>
             </tr>
           </thead>
           <tbody id="cuerpo"></tbody>
@@ -86,6 +111,35 @@
       <div class="vacio" id="vacio">No hay citas con esos filtros.</div>
     </div>
   </main>
+
+  <!-- Ventana para reprogramar -->
+  <div id="fondoModal">
+    <div class="modal">
+      <h3>Reprogramar cita</h3>
+      <div class="detalle" id="detalleCita"></div>
+
+      <div class="campo"><label>Nueva fecha</label><input type="date" id="mFecha"></div>
+      <div class="campo"><label>Nueva hora</label><input type="time" id="mHora"></div>
+      <div class="campo">
+        <label>Motivo del cambio</label>
+        <input id="mMotivo" maxlength="200" placeholder="Ej: el paciente pidió otro día">
+      </div>
+      <div class="campo">
+        <label>Canal por el que se pidió</label>
+        <select id="mCanal">
+          <option value="telefono">Teléfono</option>
+          <option value="presencial">Presencial</option>
+          <option value="web">Web</option>
+        </select>
+      </div>
+
+      <div id="mensajeModal"></div>
+      <div class="acciones">
+        <button id="btnGuardar">Guardar</button>
+        <button id="btnCancelarModal">Cancelar</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     const API_URL = "https://mi-proyecto-y2me.onrender.com";
@@ -112,9 +166,15 @@
     const cuerpo = document.getElementById("cuerpo");
     const vacio = document.getElementById("vacio");
     const total = document.getElementById("total");
+    const avisoGeneral = document.getElementById("avisoGeneral");
 
     const columnas = ["fecha", "hora", "nombre", "identificacion", "celular",
                       "servicio", "medico", "estado", "canal"];
+
+    // Fecha de hoy (hora de Colombia) para no permitir fechas pasadas
+    function hoy() {
+      return new Date().toLocaleDateString("en-CA", { timeZone: "America/Bogota" });
+    }
 
     async function cargarCitas() {
       cuerpo.innerHTML = "";
@@ -164,6 +224,19 @@
             td.textContent = cita[campo] ?? "";
             tr.appendChild(td);
           });
+
+          // Columna de acción
+          const tdAccion = document.createElement("td");
+          const boton = document.createElement("button");
+          boton.className = "btn-reprog";
+          boton.textContent = "Reprogramar";
+          if (cita.estado === "Cancelada" || cita.estado === "Atendida") {
+            boton.disabled = true;
+          }
+          boton.addEventListener("click", () => abrirModal(cita));
+          tdAccion.appendChild(boton);
+          tr.appendChild(tdAccion);
+
           cuerpo.appendChild(tr);
         });
       } catch (error) {
@@ -173,11 +246,83 @@
       }
     }
 
+    // ---- Ventana de reprogramación ----
+    const fondoModal = document.getElementById("fondoModal");
+    const mensajeModal = document.getElementById("mensajeModal");
+    let citaActual = null;
+
+    function abrirModal(cita) {
+      citaActual = cita;
+      document.getElementById("detalleCita").textContent =
+        cita.nombre + " — " + cita.servicio + " — actual: " + cita.fecha + " " + cita.hora;
+      document.getElementById("mFecha").min = hoy();
+      document.getElementById("mFecha").value = "";
+      document.getElementById("mHora").value = "";
+      document.getElementById("mMotivo").value = "";
+      document.getElementById("mCanal").value = "telefono";
+      mensajeModal.textContent = "";
+      mensajeModal.className = "";
+      fondoModal.classList.add("activo");
+    }
+
+    function cerrarModal() {
+      fondoModal.classList.remove("activo");
+      citaActual = null;
+    }
+
+    document.getElementById("btnCancelarModal").addEventListener("click", cerrarModal);
+
+    document.getElementById("btnGuardar").addEventListener("click", async () => {
+      const fecha = document.getElementById("mFecha").value;
+      const hora = document.getElementById("mHora").value;
+      const motivo = document.getElementById("mMotivo").value.trim();
+      const canal = document.getElementById("mCanal").value;
+
+      if (!fecha || !hora || !motivo) {
+        mensajeModal.className = "error";
+        mensajeModal.textContent = "Completa la fecha, la hora y el motivo.";
+        return;
+      }
+
+      const botonGuardar = document.getElementById("btnGuardar");
+      botonGuardar.disabled = true;
+      mensajeModal.className = "";
+      mensajeModal.textContent = "Guardando...";
+
+      try {
+        const respuesta = await fetch(API_URL + "/citas/" + citaActual.id_cita + "/reprogramar", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token
+          },
+          body: JSON.stringify({ fecha, hora, motivo, canal })
+        });
+        const resultado = await respuesta.json();
+
+        if (respuesta.ok) {
+          cerrarModal();
+          avisoGeneral.className = "ok";
+          avisoGeneral.textContent = resultado.mensaje;
+          cargarCitas();
+        } else {
+          mensajeModal.className = "error";
+          mensajeModal.textContent = resultado.mensaje || "No se pudo reprogramar";
+        }
+      } catch (error) {
+        mensajeModal.className = "error";
+        mensajeModal.textContent = "No se pudo conectar con el servidor";
+      } finally {
+        botonGuardar.disabled = false;
+      }
+    });
+
     document.getElementById("btnBuscar").addEventListener("click", cargarCitas);
     document.getElementById("btnLimpiar").addEventListener("click", () => {
       document.getElementById("fFecha").value = "";
       document.getElementById("fEstado").value = "";
       document.getElementById("fDocumento").value = "";
+      avisoGeneral.textContent = "";
       cargarCitas();
     });
 
