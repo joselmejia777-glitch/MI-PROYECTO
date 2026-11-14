@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="es" translate="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google" content="notranslate">
+  <title>Médico - ProSalud</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Arial, Helvetica, sans-serif; color: #333; background: #f2f7fb; }
+    .header { background: #87CEEB; display: flex; justify-content: space-between;
+              align-items: center; padding: 12px 20px; flex-wrap: wrap; gap: 10px; }
+    .logo { background: #1e4f9c; color: #fff; font-weight: bold; padding: 8px 14px; border-radius: 4px; }
+    .header button { background: #fff; border: 1px solid #333; padding: 6px 12px;
+                     font-weight: bold; cursor: pointer; border-radius: 3px; }
+    main { max-width: 1200px; margin: 20px auto; padding: 0 16px; }
+    h1 { font-size: 24px; margin: 0 0 4px; }
+    h2 { font-size: 18px; margin: 0 0 12px; }
+    .sub { color: #555; margin: 0 0 20px; }
+    .tarjeta { background: #fff; border-radius: 12px; padding: 18px;
+               box-shadow: 0 3px 10px rgba(0,0,0,.1); margin-bottom: 20px; }
+
+    .filtros { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+               gap: 12px; align-items: end; }
+    label { font-size: 13px; color: #555; display: block; margin-bottom: 4px; }
+    input, select, textarea { width: 100%; padding: 10px; border: 1px solid #999;
+                              border-radius: 6px; font-size: 15px; font-family: inherit; }
+    textarea { resize: vertical; min-height: 80px; }
+    .botones { display: flex; gap: 8px; }
+    .botones button { padding: 10px 16px; border: none; border-radius: 8px;
+                      font-weight: bold; cursor: pointer; }
+    #btnBuscar { background: #87CEEB; }
+    #btnLimpiar { background: #ddd; }
+
+    .tabla-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { padding: 10px; text-align: left; border-bottom: 1px solid #e3e3e3; white-space: nowrap; }
+    th { background: #eaf6fc; }
+    .vacio { padding: 20px; text-align: center; color: #777; display: none; }
+    .total { font-size: 13px; color: #555; margin-bottom: 10px; }
+    .btn-remitir { background: #87CEEB; border: none; padding: 7px 12px; border-radius: 6px;
+                   font-weight: bold; cursor: pointer; }
+    #avisoGeneral { margin-bottom: 12px; font-size: 14px; min-height: 18px; }
+    .ok { color: #1e8e3e; font-weight: bold; }
+    .error { color: #c0392b; font-weight: bold; }
+
+    #fondoModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5);
+                  align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
+    #fondoModal.activo { display: flex; }
+    .modal { background: #fff; padding: 24px; border-radius: 14px; width: 100%; max-width: 420px;
+             box-shadow: 0 8px 24px rgba(0,0,0,.3); }
+    .modal h3 { margin: 0 0 6px; }
+    .modal .detalle { color: #555; font-size: 14px; margin-bottom: 14px; }
+    .modal .campo { margin-bottom: 12px; }
+    .modal .acciones { display: flex; gap: 8px; margin-top: 16px; }
+    .modal .acciones button { flex: 1; padding: 11px; border: none; border-radius: 8px;
+                              font-weight: bold; cursor: pointer; }
+    #btnGuardar { background: #87CEEB; }
+    #btnCancelarModal { background: #ddd; }
+    #mensajeModal { font-size: 14px; min-height: 18px; margin-top: 8px; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="logo">PRO SALUD</div>
+    <button id="btnSalir">Cerrar sesión</button>
+  </div>
+
+  <main>
+    <h1>Hola, <span id="nombreMedico"></span></h1>
+    <p class="sub" id="subtitulo">Panel del médico</p>
+
+    <div class="tarjeta">
+      <h2>Mis citas</h2>
+      <div class="filtros">
+        <div><label>Fecha</label><input type="date" id="fFecha"></div>
+        <div>
+          <label>Estado</label>
+          <select id="fEstado">
+            <option value="">Todos</option>
+            <option value="Pendiente">Pendiente</option>
+            <option value="Confirmada">Confirmada</option>
+            <option value="Programada">Programada</option>
+            <option value="Reprogramada">Reprogramada</option>
+            <option value="Atendida">Atendida</option>
+            <option value="Cancelada">Cancelada</option>
+          </select>
+        </div>
+        <div class="botones">
+          <button id="btnBuscar">Buscar</button>
+          <button id="btnLimpiar">Limpiar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tarjeta">
+      <div id="avisoGeneral"></div>
+      <div class="total" id="totalCitas"></div>
+      <div class="tabla-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th><th>Hora</th><th>Paciente</th><th>Documento</th>
+              <th>Servicio</th><th>Estado</th><th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="cuerpoCitas"></tbody>
+        </table>
+      </div>
+      <div class="vacio" id="vacioCitas">No tienes citas con esos filtros.</div>
+    </div>
+
+    <div class="tarjeta">
+      <h2>Mis remisiones</h2>
+      <div class="tabla-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th><th>Paciente</th><th>Documento</th>
+              <th>Especialidad</th><th>Motivo</th><th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="cuerpoRemisiones"></tbody>
+        </table>
+      </div>
+      <div class="vacio" id="vacioRemisiones">Todavía no has creado remisiones.</div>
+    </div>
+  </main>
+
+  <!-- Ventana para remitir -->
+  <div id="fondoModal">
+    <div class="modal">
+      <h3>Remitir a especialista</h3>
+      <div class="detalle" id="detalleCita"></div>
+
+      <div class="campo">
+        <label>Especialidad</label>
+        <select id="mEspecialidad">
+          <option value="Odontologia">Odontología</option>
+          <option value="Pediatria">Pediatría</option>
+          <option value="Fisioterapia">Fisioterapia</option>
+          <option value="Optometria">Optometría</option>
+        </select>
+      </div>
+      <div class="campo">
+        <label>Motivo de la remisión</label>
+        <textarea id="mMotivo" maxlength="250" placeholder="Ej: dolor dental persistente"></textarea>
+      </div>
+
+      <div id="mensajeModal"></div>
+      <div class="acciones">
+        <button id="btnGuardar">Remitir</button>
+        <button id="btnCancelarModal">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "https://mi-proyecto-y2me.onrender.com";
+
+    // Protección: solo entra un médico
+    const token = sessionStorage.getItem("token");
+    const rol = sessionStorage.getItem("rol");
+
+    if (!token || rol !== "medico") {
+      window.location.href = "login.html";
+    }
+
+    let esGeneral = false;
+    const guardado = sessionStorage.getItem("empleado");
+    if (guardado) {
+      const m = JSON.parse(guardado);
+      document.getElementById("nombreMedico").textContent = (m.nombres || "").toUpperCase();
+      document.getElementById("subtitulo").textContent =
+        "Médico" + (m.especialidad ? " — " + m.especialidad : "");
+      esGeneral = m.especialidad === "Medicina General";
+    }
+
+    document.getElementById("btnSalir").addEventListener("click", () => {
+      sessionStorage.clear();
+      window.location.href = "../index.html";
+    });
+
+    const avisoGeneral = document.getElementById("avisoGeneral");
+
+    function sesionVencida() {
+      sessionStorage.clear();
+      window.location.href = "login.html";
+    }
+
+    // ---------- Mis citas ----------
+    const cuerpoCitas = document.getElementById("cuerpoCitas");
+    const vacioCitas = document.getElementById("vacioCitas");
+    const totalCitas = document.getElementById("totalCitas");
+    const columnasCitas = ["fecha", "hora", "nombre", "identificacion", "servicio", "estado"];
+
+    async function cargarCitas() {
+      cuerpoCitas.innerHTML = "";
+      vacioCitas.style.display = "none";
+      totalCitas.textContent = "Cargando...";
+
+      const params = new URLSearchParams();
+      const fecha = document.getElementById("fFecha").value;
+      const estado = document.getElementById("fEstado").value;
+      if (fecha) params.append("fecha", fecha);
+      if (estado) params.append("estado", estado);
+
+      try {
+        const respuesta = await fetch(API_URL + "/citas?" + params.toString(), {
+          headers: { "Authorization": "Bearer " + token }
+        });
+        if (respuesta.status === 401) return sesionVencida();
+
+        const citas = await respuesta.json();
+
+        if (!respuesta.ok) {
+          totalCitas.textContent = "";
+          vacioCitas.textContent = citas.mensaje || "Error al cargar las citas";
+          vacioCitas.style.display = "block";
+          return;
+        }
+
+        totalCitas.textContent = citas.length + " cita(s)";
+
+        if (citas.length === 0) {
+          vacioCitas.textContent = "No tienes citas con esos filtros.";
+          vacioCitas.style.display = "block";
+          return;
+        }
+
+        citas.forEach((cita) => {
+          const tr = document.createElement("tr");
+          columnasCitas.forEach((campo) => {
+            const td = document.createElement("td");
+            td.textContent = cita[campo] ?? "";
+            tr.appendChild(td);
+          });
+
+          const tdAccion = document.createElement("td");
+          if (esGeneral && cita.estado !== "Cancelada") {
+            const boton = document.createElement("button");
+            boton.className = "btn-remitir";
+            boton.textContent = "Remitir";
+            boton.addEventListener("click", () => abrirModal(cita));
+            tdAccion.appendChild(boton);
+          }
+          tr.appendChild(tdAccion);
+
+          cuerpoCitas.appendChild(tr);
+        });
+      } catch (error) {
+        totalCitas.textContent = "";
+        vacioCitas.textContent = "No se pudo conectar con el servidor";
+        vacioCitas.style.display = "block";
+      }
+    }
+
+    // ---------- Mis remisiones ----------
+    const cuerpoRemisiones = document.getElementById("cuerpoRemisiones");
+    const vacioRemisiones = document.getElementById("vacioRemisiones");
+    const columnasRemisiones = ["fecha_remision", "paciente", "numero_documento",
+                                "especialidad", "motivo", "estado"];
+
+    async function cargarRemisiones() {
+      cuerpoRemisiones.innerHTML = "";
+      vacioRemisiones.style.display = "none";
+
+      try {
+        const respuesta = await fetch(API_URL + "/remisiones", {
+          headers: { "Authorization": "Bearer " + token }
+        });
+        if (respuesta.status === 401) return sesionVencida();
+
+        const remisiones = await respuesta.json();
+
+        if (!respuesta.ok) {
+          vacioRemisiones.textContent = remisiones.mensaje || "Error al cargar las remisiones";
+          vacioRemisiones.style.display = "block";
+          return;
+        }
+
+        if (remisiones.length === 0) {
+          vacioRemisiones.style.display = "block";
+          return;
+        }
+
+        remisiones.forEach((r) => {
+          const tr = document.createElement("tr");
+          columnasRemisiones.forEach((campo) => {
+            const td = document.createElement("td");
+            td.textContent = r[campo] ?? "";
+            tr.appendChild(td);
+          });
+          cuerpoRemisiones.appendChild(tr);
+        });
+      } catch (error) {
+        vacioRemisiones.textContent = "No se pudo conectar con el servidor";
+        vacioRemisiones.style.display = "block";
+      }
+    }
+
+    // ---------- Ventana de remisión ----------
+    const fondoModal = document.getElementById("fondoModal");
+    const mensajeModal = document.getElementById("mensajeModal");
+    let citaActual = null;
+
+    function abrirModal(cita) {
+      citaActual = cita;
+      document.getElementById("detalleCita").textContent =
+        cita.nombre + " — cita del " + cita.fecha + " " + cita.hora;
+      document.getElementById("mEspecialidad").value = "Odontologia";
+      document.getElementById("mMotivo").value = "";
+      mensajeModal.textContent = "";
+      mensajeModal.className = "";
+      fondoModal.classList.add("activo");
+    }
+
+    function cerrarModal() {
+      fondoModal.classList.remove("activo");
+      citaActual = null;
+    }
+
+    document.getElementById("btnCancelarModal").addEventListener("click", cerrarModal);
+
+    document.getElementById("btnGuardar").addEventListener("click", async () => {
+      const especialidad = document.getElementById("mEspecialidad").value;
+      const motivo = document.getElementById("mMotivo").value.trim();
+
+      if (!motivo) {
+        mensajeModal.className = "error";
+        mensajeModal.textContent = "Escribe el motivo de la remisión.";
+        return;
+      }
+
+      const botonGuardar = document.getElementById("btnGuardar");
+      botonGuardar.disabled = true;
+      mensajeModal.className = "";
+      mensajeModal.textContent = "Guardando...";
+
+      try {
+        const respuesta = await fetch(API_URL + "/remisiones", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token
+          },
+          body: JSON.stringify({ id_cita: citaActual.id_cita, especialidad, motivo })
+        });
+        const resultado = await respuesta.json();
+
+        if (respuesta.ok) {
+          cerrarModal();
+          avisoGeneral.className = "ok";
+          avisoGeneral.textContent = resultado.mensaje;
+          cargarRemisiones();
+        } else {
+          mensajeModal.className = "error";
+          mensajeModal.textContent = resultado.mensaje || "No se pudo crear la remisión";
+        }
+      } catch (error) {
+        mensajeModal.className = "error";
+        mensajeModal.textContent = "No se pudo conectar con el servidor";
+      } finally {
+        botonGuardar.disabled = false;
+      }
+    });
+
+    document.getElementById("btnBuscar").addEventListener("click", cargarCitas);
+    document.getElementById("btnLimpiar").addEventListener("click", () => {
+      document.getElementById("fFecha").value = "";
+      document.getElementById("fEstado").value = "";
+      cargarCitas();
+    });
+
+    cargarCitas();
+    cargarRemisiones();
+  </script>
+</body>
+</html>
