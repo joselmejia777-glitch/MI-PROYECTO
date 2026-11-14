@@ -636,6 +636,133 @@ app.get('/admin/empleados', permitirRoles('administrador'), async (req, res) => 
         res.status(500).json({ mensaje: 'Error al listar empleados', error: error.message });
     }
 });
+
+// ============================================================
+// LISTA DE MÉDICOS ACTIVOS (recepcionista y administrador)
+// Filtro opcional: ?especialidad=Odontologia
+// ============================================================
+app.get('/medicos', permitirRoles('empleado', 'administrador'), async (req, res) => {
+    try {
+        const { especialidad } = req.query;
+
+        let sql = `SELECT id_empleado, CONCAT(nombres, ' ', apellidos) AS nombre, especialidad
+                   FROM empleados
+                   WHERE rol = 'medico' AND estado = 'activo'`;
+        const params = [];
+
+        if (especialidad) {
+            sql += ' AND especialidad = ?';
+            params.push(especialidad);
+        }
+
+        sql += ' ORDER BY nombres';
+
+        const [filas] = await conexion.query(sql, params);
+        res.json(filas);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: 'Error al consultar los médicos', error: error.message });
+    }
+});
+
+// ============================================================
+// AGENDAR LA CITA DE UNA REMISIÓN (recepcionista y administrador)
+// Crea la cita con el especialista y marca la remisión como agendada
+// ============================================================
+app.post('/remisiones/:id/agendar', permitirRoles('empleado', 'administrador'), async (req, res) => {
+    try {
+        const idRemision = Number(req.params.id);
+        const { id_medico, fecha, hora, canal } = req.body;
+
+        // 1. Validar datos
+        if (!id_medico || !fecha || !hora || !canal) {
+            return res.status(400).json({ mensaje: 'Faltan datos: médico, fecha, hora y canal' });
+        }
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha) || !/^\d{2}:\d{2}$/.test(hora)) {
+            return res.status(400).json({ mensaje: 'Usa el formato fecha AAAA-MM-DD y hora HH:MM' });
+        }
+        if (!['telefono', 'presencial', 'web'].includes(canal)) {
+            return res.status(400).json({ mensaje: "El canal debe ser 'telefono', 'presencial' o 'web'" });
+        }
+
+        const hoy = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Bogota' });
+        if (fecha < hoy) {
+            return res.status(400).json({ mensaje: 'La fecha no puede estar en el pasado' });
+        }
+
+        // 2. La remisión debe existir y seguir pendiente
+        const [remisiones] = await conexion.query(
+            'SELECT id_remision, id_paciente, especialidad, motivo, estado FROM remisiones WHERE id_remision = ?',
+            [idRemision]
+        );
+        if (remisiones.length === 0) {
+            return res.status(404).json({ mensaje: 'La remisión no existe' });
+        }
+        const remision = remisiones[0];
+
+        if (remision.estado !== 'pendiente') {
+            return res.status(409).json({ mensaje: 'Esta remisión ya fue agendada' });
+        }
+
+        // 3. El médico debe estar activo y ser de la especialidad remitida
+        const [medicos] = await conexion.query(
+            `SELECT id_empleado, especialidad FROM empleados
+             WHERE id_empleado = ? AND rol = 'medico' AND estado = 'activo'`,
+            [id_medico]
+        );
+        if (medicos.length === 0) {
+            return res.status(400).json({ mensaje: 'El médico no existe o no está activo' });
+        }
+        if (medicos[0].especialidad !== remision.especialidad) {
+            return res.status(400).json({ mensaje: 'El médico no es de la especialidad remitida' });
+        }
+
+        // 4. Datos del paciente para la cita
+        const [pacientes] = await conexion.query(
+            'SELECT numero_documento, nombres, apellidos, telefono, correo FROM pacientes WHERE id_paciente = ?',
+            [remision.id_paciente]
+        );
+        if (pacientes.length === 0) {
+            return res.status(404).json({ mensaje: 'El paciente de la remisión ya no existe' });
+        }
+        const paciente = pacientes[0];
+
+        // 5. Aviso de choque: el médico no puede tener dos citas a la misma hora
+        const [choque] = await conexion.query(
+            `SELECT id_cita FROM citas
+             WHERE id_medico = ? AND fecha = ? AND hora = ? AND estado <> 'Cancelada'`,
+            [id_medico, fecha, hora + ':00']
+        );
+        if (choque.length > 0) {
+            return res.status(409).json({ mensaje: 'El médico ya tiene una cita a esa fecha y hora' });
+        }
+
+        // 6. Crear la cita y marcar la remisión como agendada
+        const [resultado] = await conexion.query(
+            `INSERT INTO citas
+             (identificacion, nombre, celular, correo, fecha, hora, servicio, estado, motivo, canal, id_medico, id_paciente)
+             VALUES (?, ?, ?, ?, ?, ?, ?, 'Programada', ?, ?, ?, ?)`,
+            [paciente.numero_documento, paciente.nombres + ' ' + paciente.apellidos,
+             paciente.telefono || '', paciente.correo || '', fecha, hora + ':00',
+             remision.especialidad, remision.motivo, canal, id_medico, remision.id_paciente]
+        );
+
+        await conexion.query(
+            "UPDATE remisiones SET estado = 'agendada' WHERE id_remision = ?",
+            [idRemision]
+        );
+
+        res.status(201).json({
+            mensaje: 'Cita con el especialista agendada correctamente',
+            id_cita: resultado.insertId
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: 'Error al agendar la cita', error: error.message });
+    }
+});
 // Configurar el puerto del servidor
 const PORT = 10000;
 

@@ -15,6 +15,7 @@
                      font-weight: bold; cursor: pointer; border-radius: 3px; }
     main { max-width: 1200px; margin: 20px auto; padding: 0 16px; }
     h1 { font-size: 24px; margin: 0 0 4px; }
+    h2 { font-size: 18px; margin: 0 0 12px; }
     .sub { color: #555; margin: 0 0 20px; }
     .tarjeta { background: #fff; border-radius: 12px; padding: 18px;
                box-shadow: 0 3px 10px rgba(0,0,0,.1); margin-bottom: 20px; }
@@ -35,28 +36,27 @@
     th { background: #eaf6fc; }
     .vacio { padding: 20px; text-align: center; color: #777; display: none; }
     .total { font-size: 13px; color: #555; margin-bottom: 10px; }
-    .btn-reprog { background: #87CEEB; border: none; padding: 7px 12px; border-radius: 6px;
+    .btn-reprog, .btn-agendar { background: #87CEEB; border: none; padding: 7px 12px; border-radius: 6px;
                   font-weight: bold; cursor: pointer; }
     .btn-reprog:disabled { background: #ddd; color: #888; cursor: not-allowed; }
-    #avisoGeneral { margin-bottom: 12px; font-size: 14px; min-height: 18px; }
+    .aviso { margin-bottom: 12px; font-size: 14px; min-height: 18px; }
     .ok { color: #1e8e3e; font-weight: bold; }
     .error { color: #c0392b; font-weight: bold; }
 
-    /* Ventana de reprogramación */
-    #fondoModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5);
-                  align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
-    #fondoModal.activo { display: flex; }
+    .fondo { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5);
+             align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
+    .fondo.activo { display: flex; }
     .modal { background: #fff; padding: 24px; border-radius: 14px; width: 100%; max-width: 400px;
-             box-shadow: 0 8px 24px rgba(0,0,0,.3); }
+             box-shadow: 0 8px 24px rgba(0,0,0,.3); max-height: 95vh; overflow-y: auto; }
     .modal h3 { margin: 0 0 6px; }
     .modal .detalle { color: #555; font-size: 14px; margin-bottom: 14px; }
     .modal .campo { margin-bottom: 12px; }
     .modal .acciones { display: flex; gap: 8px; margin-top: 16px; }
     .modal .acciones button { flex: 1; padding: 11px; border: none; border-radius: 8px;
                               font-weight: bold; cursor: pointer; }
-    #btnGuardar { background: #87CEEB; }
-    #btnCancelarModal { background: #ddd; }
-    #mensajeModal { font-size: 14px; min-height: 18px; margin-top: 8px; }
+    .btn-guardar { background: #87CEEB; }
+    .btn-cancelar { background: #ddd; }
+    .mensaje-modal { font-size: 14px; min-height: 18px; margin-top: 8px; }
   </style>
 </head>
 <body>
@@ -70,7 +70,27 @@
     <h1>Hola, <span id="nombreEmpleado"></span></h1>
     <p class="sub">Recepción: agenda de citas</p>
 
+    <!-- Remisiones pendientes -->
     <div class="tarjeta">
+      <h2>Remisiones pendientes</h2>
+      <div class="aviso" id="avisoRemision"></div>
+      <div class="tabla-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th><th>Paciente</th><th>Documento</th><th>Teléfono</th>
+              <th>Especialidad</th><th>Motivo</th><th>Remite</th><th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="cuerpoRemisiones"></tbody>
+        </table>
+      </div>
+      <div class="vacio" id="vacioRemisiones">No hay remisiones pendientes.</div>
+    </div>
+
+    <!-- Filtros de citas -->
+    <div class="tarjeta">
+      <h2>Agenda de citas</h2>
       <div class="filtros">
         <div><label>Fecha</label><input type="date" id="fFecha"></div>
         <div>
@@ -94,7 +114,7 @@
     </div>
 
     <div class="tarjeta">
-      <div id="avisoGeneral"></div>
+      <div class="aviso" id="avisoGeneral"></div>
       <div class="total" id="total"></div>
       <div class="tabla-wrap">
         <table>
@@ -113,7 +133,7 @@
   </main>
 
   <!-- Ventana para reprogramar -->
-  <div id="fondoModal">
+  <div class="fondo" id="fondoModal">
     <div class="modal">
       <h3>Reprogramar cita</h3>
       <div class="detalle" id="detalleCita"></div>
@@ -133,10 +153,39 @@
         </select>
       </div>
 
-      <div id="mensajeModal"></div>
+      <div class="mensaje-modal" id="mensajeModal"></div>
       <div class="acciones">
-        <button id="btnGuardar">Guardar</button>
-        <button id="btnCancelarModal">Cancelar</button>
+        <button class="btn-guardar" id="btnGuardar">Guardar</button>
+        <button class="btn-cancelar" id="btnCancelarModal">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ventana para agendar con el especialista -->
+  <div class="fondo" id="fondoAgendar">
+    <div class="modal">
+      <h3>Agendar con especialista</h3>
+      <div class="detalle" id="detalleRemision"></div>
+
+      <div class="campo">
+        <label>Médico</label>
+        <select id="aMedico"></select>
+      </div>
+      <div class="campo"><label>Fecha</label><input type="date" id="aFecha"></div>
+      <div class="campo"><label>Hora</label><input type="time" id="aHora"></div>
+      <div class="campo">
+        <label>Canal por el que se pidió</label>
+        <select id="aCanal">
+          <option value="telefono">Teléfono</option>
+          <option value="presencial">Presencial</option>
+          <option value="web">Web</option>
+        </select>
+      </div>
+
+      <div class="mensaje-modal" id="mensajeAgendar"></div>
+      <div class="acciones">
+        <button class="btn-guardar" id="btnAgendar">Agendar</button>
+        <button class="btn-cancelar" id="btnCancelarAgendar">Cancelar</button>
       </div>
     </div>
   </div>
@@ -163,18 +212,182 @@
       window.location.href = "../index.html";
     });
 
-    const cuerpo = document.getElementById("cuerpo");
-    const vacio = document.getElementById("vacio");
-    const total = document.getElementById("total");
-    const avisoGeneral = document.getElementById("avisoGeneral");
-
-    const columnas = ["fecha", "hora", "nombre", "identificacion", "celular",
-                      "servicio", "medico", "estado", "canal"];
+    function sesionVencida() {
+      sessionStorage.clear();
+      window.location.href = "login.html";
+    }
 
     // Fecha de hoy (hora de Colombia) para no permitir fechas pasadas
     function hoy() {
       return new Date().toLocaleDateString("en-CA", { timeZone: "America/Bogota" });
     }
+
+    const avisoGeneral = document.getElementById("avisoGeneral");
+    const avisoRemision = document.getElementById("avisoRemision");
+
+    // ================= REMISIONES PENDIENTES =================
+    const cuerpoRemisiones = document.getElementById("cuerpoRemisiones");
+    const vacioRemisiones = document.getElementById("vacioRemisiones");
+    const columnasRemisiones = ["fecha_remision", "paciente", "numero_documento", "telefono",
+                                "especialidad", "motivo", "medico_remite"];
+
+    async function cargarRemisiones() {
+      cuerpoRemisiones.innerHTML = "";
+      vacioRemisiones.style.display = "none";
+
+      try {
+        const respuesta = await fetch(API_URL + "/remisiones?estado=pendiente", {
+          headers: { "Authorization": "Bearer " + token }
+        });
+        if (respuesta.status === 401) return sesionVencida();
+
+        const remisiones = await respuesta.json();
+
+        if (!respuesta.ok) {
+          vacioRemisiones.textContent = remisiones.mensaje || "Error al cargar las remisiones";
+          vacioRemisiones.style.display = "block";
+          return;
+        }
+
+        if (remisiones.length === 0) {
+          vacioRemisiones.textContent = "No hay remisiones pendientes.";
+          vacioRemisiones.style.display = "block";
+          return;
+        }
+
+        remisiones.forEach((r) => {
+          const tr = document.createElement("tr");
+          columnasRemisiones.forEach((campo) => {
+            const td = document.createElement("td");
+            td.textContent = r[campo] ?? "";
+            tr.appendChild(td);
+          });
+
+          const tdAccion = document.createElement("td");
+          const boton = document.createElement("button");
+          boton.className = "btn-agendar";
+          boton.textContent = "Agendar";
+          boton.addEventListener("click", () => abrirAgendar(r));
+          tdAccion.appendChild(boton);
+          tr.appendChild(tdAccion);
+
+          cuerpoRemisiones.appendChild(tr);
+        });
+      } catch (error) {
+        vacioRemisiones.textContent = "No se pudo conectar con el servidor";
+        vacioRemisiones.style.display = "block";
+      }
+    }
+
+    // ---- Ventana de agendar con el especialista ----
+    const fondoAgendar = document.getElementById("fondoAgendar");
+    const mensajeAgendar = document.getElementById("mensajeAgendar");
+    const selectMedico = document.getElementById("aMedico");
+    let remisionActual = null;
+
+    async function abrirAgendar(remision) {
+      remisionActual = remision;
+      document.getElementById("detalleRemision").textContent =
+        remision.paciente + " — " + remision.especialidad;
+      document.getElementById("aFecha").min = hoy();
+      document.getElementById("aFecha").value = "";
+      document.getElementById("aHora").value = "";
+      document.getElementById("aCanal").value = "telefono";
+      mensajeAgendar.className = "mensaje-modal";
+      mensajeAgendar.textContent = "Cargando médicos...";
+      selectMedico.innerHTML = "";
+      fondoAgendar.classList.add("activo");
+
+      try {
+        const respuesta = await fetch(
+          API_URL + "/medicos?especialidad=" + encodeURIComponent(remision.especialidad),
+          { headers: { "Authorization": "Bearer " + token } }
+        );
+        if (respuesta.status === 401) return sesionVencida();
+
+        const medicos = await respuesta.json();
+
+        if (!respuesta.ok || medicos.length === 0) {
+          mensajeAgendar.className = "mensaje-modal error";
+          mensajeAgendar.textContent = "No hay médicos activos de " + remision.especialidad + ".";
+          return;
+        }
+
+        medicos.forEach((m) => {
+          const opcion = document.createElement("option");
+          opcion.value = m.id_empleado;
+          opcion.textContent = m.nombre;
+          selectMedico.appendChild(opcion);
+        });
+        mensajeAgendar.textContent = "";
+      } catch (error) {
+        mensajeAgendar.className = "mensaje-modal error";
+        mensajeAgendar.textContent = "No se pudo conectar con el servidor";
+      }
+    }
+
+    function cerrarAgendar() {
+      fondoAgendar.classList.remove("activo");
+      remisionActual = null;
+    }
+
+    document.getElementById("btnCancelarAgendar").addEventListener("click", cerrarAgendar);
+
+    document.getElementById("btnAgendar").addEventListener("click", async () => {
+      const id_medico = selectMedico.value;
+      const fecha = document.getElementById("aFecha").value;
+      const hora = document.getElementById("aHora").value;
+      const canal = document.getElementById("aCanal").value;
+
+      if (!id_medico || !fecha || !hora) {
+        mensajeAgendar.className = "mensaje-modal error";
+        mensajeAgendar.textContent = "Elige el médico, la fecha y la hora.";
+        return;
+      }
+
+      const boton = document.getElementById("btnAgendar");
+      boton.disabled = true;
+      mensajeAgendar.className = "mensaje-modal";
+      mensajeAgendar.textContent = "Guardando...";
+
+      try {
+        const respuesta = await fetch(
+          API_URL + "/remisiones/" + remisionActual.id_remision + "/agendar",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer " + token
+            },
+            body: JSON.stringify({ id_medico: Number(id_medico), fecha, hora, canal })
+          }
+        );
+        const resultado = await respuesta.json();
+
+        if (respuesta.ok) {
+          cerrarAgendar();
+          avisoRemision.className = "aviso ok";
+          avisoRemision.textContent = resultado.mensaje;
+          cargarRemisiones();
+          cargarCitas();
+        } else {
+          mensajeAgendar.className = "mensaje-modal error";
+          mensajeAgendar.textContent = resultado.mensaje || "No se pudo agendar";
+        }
+      } catch (error) {
+        mensajeAgendar.className = "mensaje-modal error";
+        mensajeAgendar.textContent = "No se pudo conectar con el servidor";
+      } finally {
+        boton.disabled = false;
+      }
+    });
+
+    // ================= AGENDA DE CITAS =================
+    const cuerpo = document.getElementById("cuerpo");
+    const vacio = document.getElementById("vacio");
+    const total = document.getElementById("total");
+    const columnas = ["fecha", "hora", "nombre", "identificacion", "celular",
+                      "servicio", "medico", "estado", "canal"];
 
     async function cargarCitas() {
       cuerpo.innerHTML = "";
@@ -193,12 +406,7 @@
         const respuesta = await fetch(API_URL + "/citas?" + params.toString(), {
           headers: { "Authorization": "Bearer " + token }
         });
-
-        if (respuesta.status === 401) {
-          sessionStorage.clear();
-          window.location.href = "login.html";
-          return;
-        }
+        if (respuesta.status === 401) return sesionVencida();
 
         const citas = await respuesta.json();
 
@@ -225,7 +433,6 @@
             tr.appendChild(td);
           });
 
-          // Columna de acción
           const tdAccion = document.createElement("td");
           const boton = document.createElement("button");
           boton.className = "btn-reprog";
@@ -261,7 +468,7 @@
       document.getElementById("mMotivo").value = "";
       document.getElementById("mCanal").value = "telefono";
       mensajeModal.textContent = "";
-      mensajeModal.className = "";
+      mensajeModal.className = "mensaje-modal";
       fondoModal.classList.add("activo");
     }
 
@@ -279,14 +486,14 @@
       const canal = document.getElementById("mCanal").value;
 
       if (!fecha || !hora || !motivo) {
-        mensajeModal.className = "error";
+        mensajeModal.className = "mensaje-modal error";
         mensajeModal.textContent = "Completa la fecha, la hora y el motivo.";
         return;
       }
 
       const botonGuardar = document.getElementById("btnGuardar");
       botonGuardar.disabled = true;
-      mensajeModal.className = "";
+      mensajeModal.className = "mensaje-modal";
       mensajeModal.textContent = "Guardando...";
 
       try {
@@ -302,15 +509,15 @@
 
         if (respuesta.ok) {
           cerrarModal();
-          avisoGeneral.className = "ok";
+          avisoGeneral.className = "aviso ok";
           avisoGeneral.textContent = resultado.mensaje;
           cargarCitas();
         } else {
-          mensajeModal.className = "error";
+          mensajeModal.className = "mensaje-modal error";
           mensajeModal.textContent = resultado.mensaje || "No se pudo reprogramar";
         }
       } catch (error) {
-        mensajeModal.className = "error";
+        mensajeModal.className = "mensaje-modal error";
         mensajeModal.textContent = "No se pudo conectar con el servidor";
       } finally {
         botonGuardar.disabled = false;
@@ -326,6 +533,7 @@
       cargarCitas();
     });
 
+    cargarRemisiones();
     cargarCitas();
   </script>
 </body>
