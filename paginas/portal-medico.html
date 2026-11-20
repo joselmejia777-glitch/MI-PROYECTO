@@ -38,26 +38,40 @@
     th { background: #eaf6fc; }
     .vacio { padding: 20px; text-align: center; color: #777; display: none; }
     .total { font-size: 13px; color: #555; margin-bottom: 10px; }
+    .acciones-fila { display: flex; gap: 6px; }
     .btn-remitir { background: #87CEEB; border: none; padding: 7px 12px; border-radius: 6px;
                    font-weight: bold; cursor: pointer; }
+    .btn-trat { background: #1e4f9c; color: #fff; border: none; padding: 7px 12px; border-radius: 6px;
+                font-weight: bold; cursor: pointer; }
     #avisoGeneral { margin-bottom: 12px; font-size: 14px; min-height: 18px; }
     .ok { color: #1e8e3e; font-weight: bold; }
     .error { color: #c0392b; font-weight: bold; }
 
-    #fondoModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5);
+    #fondoModal, #fondoTrat { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5);
                   align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
-    #fondoModal.activo { display: flex; }
+    #fondoModal.activo, #fondoTrat.activo { display: flex; }
     .modal { background: #fff; padding: 24px; border-radius: 14px; width: 100%; max-width: 420px;
-             box-shadow: 0 8px 24px rgba(0,0,0,.3); }
+             box-shadow: 0 8px 24px rgba(0,0,0,.3); max-height: 92vh; overflow-y: auto; }
+    .modal.ancho { max-width: 520px; }
     .modal h3 { margin: 0 0 6px; }
     .modal .detalle { color: #555; font-size: 14px; margin-bottom: 14px; }
     .modal .campo { margin-bottom: 12px; }
+    .modal .fila-doble { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .modal .acciones { display: flex; gap: 8px; margin-top: 16px; }
     .modal .acciones button { flex: 1; padding: 11px; border: none; border-radius: 8px;
                               font-weight: bold; cursor: pointer; }
-    #btnGuardar { background: #87CEEB; }
-    #btnCancelarModal { background: #ddd; }
-    #mensajeModal { font-size: 14px; min-height: 18px; margin-top: 8px; }
+    #btnGuardar, #btnGuardarTrat { background: #87CEEB; }
+    #btnCancelarModal, #btnCerrarTrat { background: #ddd; }
+    #mensajeModal, #mensajeTrat { font-size: 14px; min-height: 18px; margin-top: 8px; }
+
+    .lista-trat { margin-top: 18px; border-top: 1px solid #e3e3e3; padding-top: 12px; }
+    .lista-trat h4 { margin: 0 0 8px; font-size: 15px; }
+    .item-trat { background: #f2f7fb; border-radius: 8px; padding: 10px; margin-bottom: 8px; font-size: 14px; }
+    .item-trat .titulo { font-weight: bold; }
+    .item-trat .etiqueta { display: inline-block; font-size: 12px; padding: 2px 8px; border-radius: 10px;
+                           background: #87CEEB; margin-left: 6px; font-weight: normal; }
+    .item-trat .linea { color: #555; margin-top: 3px; }
+    .sin-trat { color: #777; font-size: 14px; }
   </style>
 </head>
 <body>
@@ -156,6 +170,55 @@
     </div>
   </div>
 
+  <!-- Ventana de medicamentos y tratamientos -->
+  <div id="fondoTrat">
+    <div class="modal ancho">
+      <h3>Medicamentos y tratamientos</h3>
+      <div class="detalle" id="detalleTrat"></div>
+
+      <div class="campo">
+        <label>Tipo</label>
+        <select id="tTipo">
+          <option value="medicamento">Medicamento</option>
+          <option value="tratamiento">Tratamiento</option>
+        </select>
+      </div>
+      <div class="campo">
+        <label>Nombre</label>
+        <input type="text" id="tNombre" maxlength="150" placeholder="Ej: Ibuprofeno 400 mg">
+      </div>
+      <div class="fila-doble" id="filaDosis">
+        <div class="campo">
+          <label>Dosis</label>
+          <input type="text" id="tDosis" maxlength="100" placeholder="Ej: 1 tableta">
+        </div>
+        <div class="campo">
+          <label>Frecuencia</label>
+          <input type="text" id="tFrecuencia" maxlength="100" placeholder="Ej: Cada 8 horas">
+        </div>
+      </div>
+      <div class="campo">
+        <label>Duración</label>
+        <input type="text" id="tDuracion" maxlength="100" placeholder="Ej: 5 días">
+      </div>
+      <div class="campo">
+        <label>Indicaciones</label>
+        <textarea id="tIndicaciones" placeholder="Ej: Tomar después de las comidas"></textarea>
+      </div>
+
+      <div id="mensajeTrat"></div>
+      <div class="acciones">
+        <button id="btnGuardarTrat">Guardar</button>
+        <button id="btnCerrarTrat">Cerrar</button>
+      </div>
+
+      <div class="lista-trat">
+        <h4>Registrado en esta cita</h4>
+        <div id="listaTrat"></div>
+      </div>
+    </div>
+  </div>
+
   <script>
     const API_URL = "https://mi-proyecto-y2me.onrender.com";
 
@@ -238,13 +301,26 @@
           });
 
           const tdAccion = document.createElement("td");
+          const contenedor = document.createElement("div");
+          contenedor.className = "acciones-fila";
+
+          if (cita.estado !== "Cancelada") {
+            const botonTrat = document.createElement("button");
+            botonTrat.className = "btn-trat";
+            botonTrat.textContent = "Tratamientos";
+            botonTrat.addEventListener("click", () => abrirTrat(cita));
+            contenedor.appendChild(botonTrat);
+          }
+
           if (esGeneral && cita.estado !== "Cancelada") {
             const boton = document.createElement("button");
             boton.className = "btn-remitir";
             boton.textContent = "Remitir";
             boton.addEventListener("click", () => abrirModal(cita));
-            tdAccion.appendChild(boton);
+            contenedor.appendChild(boton);
           }
+
+          tdAccion.appendChild(contenedor);
           tr.appendChild(tdAccion);
 
           cuerpoCitas.appendChild(tr);
@@ -361,6 +437,179 @@
       } catch (error) {
         mensajeModal.className = "error";
         mensajeModal.textContent = "No se pudo conectar con el servidor";
+      } finally {
+        botonGuardar.disabled = false;
+      }
+    });
+
+    // ---------- Ventana de medicamentos y tratamientos ----------
+    const fondoTrat = document.getElementById("fondoTrat");
+    const mensajeTrat = document.getElementById("mensajeTrat");
+    const listaTrat = document.getElementById("listaTrat");
+    const tTipo = document.getElementById("tTipo");
+    const filaDosis = document.getElementById("filaDosis");
+    let citaTrat = null;
+
+    // Si es tratamiento, se ocultan dosis y frecuencia
+    function ajustarCamposTipo() {
+      const esMedicamento = tTipo.value === "medicamento";
+      filaDosis.style.display = esMedicamento ? "grid" : "none";
+      if (!esMedicamento) {
+        document.getElementById("tDosis").value = "";
+        document.getElementById("tFrecuencia").value = "";
+      }
+    }
+    tTipo.addEventListener("change", ajustarCamposTipo);
+
+    function limpiarFormularioTrat() {
+      ["tNombre", "tDosis", "tFrecuencia", "tDuracion", "tIndicaciones"].forEach((id) => {
+        document.getElementById(id).value = "";
+      });
+    }
+
+    function abrirTrat(cita) {
+      citaTrat = cita;
+      document.getElementById("detalleTrat").textContent =
+        cita.nombre + " — cita del " + cita.fecha + " " + cita.hora;
+      tTipo.value = "medicamento";
+      ajustarCamposTipo();
+      limpiarFormularioTrat();
+      mensajeTrat.textContent = "";
+      mensajeTrat.className = "";
+      fondoTrat.classList.add("activo");
+      cargarTratamientosCita();
+    }
+
+    function cerrarTrat() {
+      fondoTrat.classList.remove("activo");
+      citaTrat = null;
+    }
+
+    document.getElementById("btnCerrarTrat").addEventListener("click", cerrarTrat);
+
+    function agregarLinea(contenedor, texto) {
+      if (!texto) return;
+      const linea = document.createElement("div");
+      linea.className = "linea";
+      linea.textContent = texto;
+      contenedor.appendChild(linea);
+    }
+
+    async function cargarTratamientosCita() {
+      listaTrat.innerHTML = "";
+      const idCita = citaTrat.id_cita;
+
+      const cargando = document.createElement("div");
+      cargando.className = "sin-trat";
+      cargando.textContent = "Cargando...";
+      listaTrat.appendChild(cargando);
+
+      try {
+        const respuesta = await fetch(API_URL + "/tratamientos/cita/" + idCita, {
+          headers: { "Authorization": "Bearer " + token }
+        });
+        if (respuesta.status === 401) return sesionVencida();
+
+        const datos = await respuesta.json();
+        listaTrat.innerHTML = "";
+
+        // Si el médico cerró la ventana mientras cargaba, no se dibuja nada
+        if (!citaTrat || citaTrat.id_cita !== idCita) return;
+
+        if (!respuesta.ok) {
+          const error = document.createElement("div");
+          error.className = "sin-trat";
+          error.textContent = datos.mensaje || "No se pudo cargar la lista";
+          listaTrat.appendChild(error);
+          return;
+        }
+
+        if (datos.length === 0) {
+          const vacio = document.createElement("div");
+          vacio.className = "sin-trat";
+          vacio.textContent = "Todavía no hay nada registrado en esta cita.";
+          listaTrat.appendChild(vacio);
+          return;
+        }
+
+        datos.forEach((t) => {
+          const item = document.createElement("div");
+          item.className = "item-trat";
+
+          const titulo = document.createElement("div");
+          titulo.className = "titulo";
+          titulo.textContent = t.nombre;
+          const etiqueta = document.createElement("span");
+          etiqueta.className = "etiqueta";
+          etiqueta.textContent = t.tipo === "medicamento" ? "Medicamento" : "Tratamiento";
+          titulo.appendChild(etiqueta);
+          item.appendChild(titulo);
+
+          const dosisFrecuencia = [t.dosis, t.frecuencia].filter(Boolean).join(" — ");
+          agregarLinea(item, dosisFrecuencia);
+          if (t.duracion) agregarLinea(item, "Duración: " + t.duracion);
+          if (t.indicaciones) agregarLinea(item, "Indicaciones: " + t.indicaciones);
+          agregarLinea(item, "Registrado: " + t.fecha_registro + " · Estado: " + t.estado);
+
+          listaTrat.appendChild(item);
+        });
+      } catch (error) {
+        listaTrat.innerHTML = "";
+        const falla = document.createElement("div");
+        falla.className = "sin-trat";
+        falla.textContent = "No se pudo conectar con el servidor";
+        listaTrat.appendChild(falla);
+      }
+    }
+
+    document.getElementById("btnGuardarTrat").addEventListener("click", async () => {
+      const tipo = tTipo.value;
+      const nombre = document.getElementById("tNombre").value.trim();
+
+      if (nombre.length < 2) {
+        mensajeTrat.className = "error";
+        mensajeTrat.textContent = "Escribe el nombre (mínimo 2 letras).";
+        return;
+      }
+
+      const botonGuardar = document.getElementById("btnGuardarTrat");
+      botonGuardar.disabled = true;
+      mensajeTrat.className = "";
+      mensajeTrat.textContent = "Guardando...";
+
+      try {
+        const respuesta = await fetch(API_URL + "/tratamientos", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token
+          },
+          body: JSON.stringify({
+            id_cita: citaTrat.id_cita,
+            tipo,
+            nombre,
+            dosis: document.getElementById("tDosis").value.trim(),
+            frecuencia: document.getElementById("tFrecuencia").value.trim(),
+            duracion: document.getElementById("tDuracion").value.trim(),
+            indicaciones: document.getElementById("tIndicaciones").value.trim()
+          })
+        });
+        if (respuesta.status === 401) return sesionVencida();
+
+        const resultado = await respuesta.json();
+
+        if (respuesta.ok) {
+          mensajeTrat.className = "ok";
+          mensajeTrat.textContent = resultado.mensaje;
+          limpiarFormularioTrat();
+          cargarTratamientosCita();
+        } else {
+          mensajeTrat.className = "error";
+          mensajeTrat.textContent = resultado.mensaje || "No se pudo guardar";
+        }
+      } catch (error) {
+        mensajeTrat.className = "error";
+        mensajeTrat.textContent = "No se pudo conectar con el servidor";
       } finally {
         botonGuardar.disabled = false;
       }
