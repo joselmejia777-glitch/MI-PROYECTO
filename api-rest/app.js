@@ -763,6 +763,131 @@ app.post('/remisiones/:id/agendar', permitirRoles('empleado', 'administrador'), 
         res.status(500).json({ mensaje: 'Error al agendar la cita', error: error.message });
     }
 });
+
+// ============================================================
+// TRATAMIENTOS Y MEDICAMENTOS
+// ============================================================
+
+// El médico registra un medicamento o tratamiento en una cita suya
+app.post('/tratamientos', permitirRoles('medico'), async (req, res) => {
+    try {
+        const { id_cita, tipo, nombre, dosis, frecuencia, duracion, indicaciones } = req.body;
+
+        // 1. Validar datos
+        if (!id_cita || !tipo || !nombre) {
+            return res.status(400).json({ mensaje: 'Faltan datos: id_cita, tipo y nombre' });
+        }
+        if (!['medicamento', 'tratamiento'].includes(tipo)) {
+            return res.status(400).json({ mensaje: "El tipo debe ser 'medicamento' o 'tratamiento'" });
+        }
+        if (nombre.trim().length < 2 || nombre.length > 150) {
+            return res.status(400).json({ mensaje: 'El nombre debe tener entre 2 y 150 caracteres' });
+        }
+
+        // 2. La cita debe existir y ser de este médico
+        const [citas] = await conexion.query(
+            'SELECT id_cita, id_paciente, id_medico, estado FROM citas WHERE id_cita = ?',
+            [id_cita]
+        );
+        if (citas.length === 0) {
+            return res.status(404).json({ mensaje: 'La cita no existe' });
+        }
+        const cita = citas[0];
+
+        if (cita.id_medico !== req.usuario.id) {
+            return res.status(403).json({ mensaje: 'Esta cita no es tuya' });
+        }
+        if (!cita.id_paciente) {
+            return res.status(400).json({ mensaje: 'La cita no está vinculada a un paciente registrado' });
+        }
+        if (cita.estado === 'Cancelada') {
+            return res.status(409).json({ mensaje: 'No se puede registrar en una cita cancelada' });
+        }
+
+        // 3. Guardar
+        const [resultado] = await conexion.query(
+            `INSERT INTO tratamientos
+             (id_cita, id_paciente, id_medico, tipo, nombre, dosis, frecuencia, duracion, indicaciones)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [id_cita, cita.id_paciente, req.usuario.id, tipo, nombre.trim(),
+             dosis || null, frecuencia || null, duracion || null, indicaciones || null]
+        );
+
+        res.status(201).json({
+            mensaje: tipo === 'medicamento' ? 'Medicamento registrado' : 'Tratamiento registrado',
+            id_tratamiento: resultado.insertId
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: 'Error al registrar el tratamiento', error: error.message });
+    }
+});
+
+// El médico ve lo registrado en una de sus citas
+app.get('/tratamientos/cita/:id', permitirRoles('medico'), async (req, res) => {
+    try {
+        const idCita = Number(req.params.id);
+
+        const [citas] = await conexion.query(
+            'SELECT id_medico FROM citas WHERE id_cita = ?',
+            [idCita]
+        );
+        if (citas.length === 0) {
+            return res.status(404).json({ mensaje: 'La cita no existe' });
+        }
+        if (citas[0].id_medico !== req.usuario.id) {
+            return res.status(403).json({ mensaje: 'Esta cita no es tuya' });
+        }
+
+        const [filas] = await conexion.query(
+            `SELECT id_tratamiento, tipo, nombre, dosis, frecuencia, duracion, indicaciones, estado,
+                    DATE_FORMAT(fecha_registro, '%Y-%m-%d %H:%i') AS fecha_registro
+             FROM tratamientos
+             WHERE id_cita = ?
+             ORDER BY fecha_registro DESC`,
+            [idCita]
+        );
+        res.json(filas);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: 'Error al consultar los tratamientos', error: error.message });
+    }
+});
+
+// El paciente ve sus propios medicamentos y tratamientos
+// Filtro opcional: ?estado=activo
+app.get('/mis-tratamientos', permitirRoles('paciente'), async (req, res) => {
+    try {
+        const { estado } = req.query;
+
+        let sql = `
+            SELECT t.id_tratamiento, t.tipo, t.nombre, t.dosis, t.frecuencia, t.duracion,
+                   t.indicaciones, t.estado,
+                   DATE_FORMAT(t.fecha_registro, '%Y-%m-%d') AS fecha_registro,
+                   CONCAT(e.nombres, ' ', e.apellidos) AS medico, e.especialidad
+            FROM tratamientos t
+            JOIN empleados e ON e.id_empleado = t.id_medico
+            WHERE t.id_paciente = ?`;
+        const params = [req.usuario.id];
+
+        if (estado) {
+            sql += ' AND t.estado = ?';
+            params.push(estado);
+        }
+
+        sql += ' ORDER BY t.fecha_registro DESC';
+
+        const [filas] = await conexion.query(sql, params);
+        res.json(filas);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: 'Error al consultar tus tratamientos', error: error.message });
+    }
+});
+
 // Configurar el puerto del servidor
 const PORT = 10000;
 
